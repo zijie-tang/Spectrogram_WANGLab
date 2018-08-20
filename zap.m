@@ -2,14 +2,11 @@ function zap
 % Zafar's audio player (Zap) graphical user interface (GUI).
 %
 %   Toolbar:
-%       Open Mixture:               Open mixture file (.wav or .mp3)
-%       Play Mixture:               Play/stop selected mixture audio
-%       Select:                     Select/deselect on signal axes (left/right mouse click)
-%       Zoom:                       Zoom in/out on any axes (left/right mouse click)
-%       Pan:                        Pan on any axes
-%   Axes:
-%       Mixture signal axes:        Display mixture signal
-%       Mixture spectrogram axes:   Display mixture spectrogram
+%       Open:   Open audio file (.wav or .mp3)
+%       Play:   Play/stop selected audio
+%       Select: Select/deselect on the signal axes (left/right mouse click)
+%       Zoom:   Zoom in/out on any axes (left/right mouse click)
+%       Pan:    Pan on any axes
 %   
 %   Author:
 %       Zafar Rafii
@@ -36,12 +33,12 @@ toolbar_object = uitoolbar(figure_object);
 % Create open and play toggle buttons on toolbar
 open_toggle = uitoggletool(toolbar_object, ...
     'CData',iconread('file_open.png'), ...
-    'TooltipString','Open Mixture', ...
+    'TooltipString','Open', ...
     'Enable','on', ...
     'ClickedCallback',@openclickedcallback);
 play_toggle = uitoggletool(toolbar_object, ...
     'CData',playicon, ...
-    'TooltipString','Play Mixture', ...
+    'TooltipString','Play', ...
     'Enable','off');
 
 % Create pointer, zoom, and hand toggle buttons on toolbar
@@ -72,6 +69,8 @@ spectrogram_axes = axes( ...
     'XTick',[], ...
     'YTick',[], ...
     'Box','on');
+
+% [left, bottom, width, heigh]
 
 % Synchronize the x-axis limits of the signal and spectrogram axes
 linkaxes([signal_axes,spectrogram_axes],'x')
@@ -151,7 +150,7 @@ figure_object.Visible = 'on';
         spectrogram_axes.Colormap = jet;
         spectrogram_axes.YDir = 'normal';
         spectrogram_axes.XGrid = 'on';
-        spectrogram_axes.Title.String = 'Audio Spectrogram';
+        spectrogram_axes.Title.String = 'Spectrogram (dB)';
         spectrogram_axes.XLabel.String = 'Time (s)';
         spectrogram_axes.YLabel.String = 'Frequency (Hz)';
         
@@ -357,7 +356,7 @@ audio_line = [];
     function audioplayerstopfcn(~,~)
         
         % Change the play audio toggle button icon to a play icon
-        playaudio_toggle.CData = playicon;
+        play_toggle.CData = playicon;
         
         % Delete the audio line
         delete(audio_line)
@@ -384,11 +383,11 @@ audio_line = [];
 
 end
 
-% Set a select audio tool on a audio signal axes using an audio player
-function selectaudiotool(audiosignal_axes,audio_player)
+% Set a select audio tool on the signal axes using the audio player
+function selectaudiotool(signal_axes,audio_player)
 
 % Add mouse-click callback function to the audio signal axes
-audiosignal_axes.ButtonDownFcn = @audiosignalaxesbuttondownfcn;
+signal_axes.ButtonDownFcn = @signalaxesbuttondownfcn;
 
 % Initialize the audio line and the audio patch with its two audio lines
 audio_line = [];
@@ -396,15 +395,15 @@ audio_patch = [];
 audio_line1 = [];
 audio_line2 = [];
 
-    % Mouse-click callback function for the audio signal axes
-    function audiosignalaxesbuttondownfcn(~,~)
+    % Mouse-click callback function for the signal axes
+    function signalaxesbuttondownfcn(~,~)
         
         % Location of the mouse pointer
-        current_point = audiosignal_axes.CurrentPoint;
+        current_point = signal_axes.CurrentPoint;
         
         % Minimum and maximum x and y-axis limits
-        x_lim = audiosignal_axes.XLim;
-        y_lim = audiosignal_axes.YLim;
+        x_lim = signal_axes.XLim;
+        y_lim = signal_axes.YLim;
         
         % If the current point is out of the axis limits, return
         if current_point(1,1) < x_lim(1) || current_point(1,1) > x_lim(2) || ...
@@ -437,23 +436,22 @@ audio_line2 = [];
                 delete(audio_patch)
             end
             
-            % Create an audio line on the audio signal axes
-            audio_line = line(audiosignal_axes,current_point(1,1)*[1,1],[-1,1]);
+            % Create an audio line on the signal axes
+            audio_line = line(signal_axes,current_point(1,1)*[1,1],[-1,1]);
             
             % Make the audio line not able to capture mouse clicks
             audio_line.PickableParts  = 'none';
             
-            % Create an audio patch with two audio lines
+            % Create an audio patch with two audio lines on the signal axes
             color_value = 0.75*[1,1,1];
-            audio_patch = patch(audiosignal_axes, ...
+            audio_patch = patch(signal_axes, ...
                 current_point(1)*[1,1,1,1],[-1,1,1,-1],color_value,'LineStyle','none');
-            audio_line1 = line(audiosignal_axes, ...
+            audio_line1 = line(signal_axes, ...
                 current_point(1,1)*[1,1],[-1,1],'Color',color_value);
-            audio_line2 = line(audiosignal_axes, ...
+            audio_line2 = line(signal_axes, ...
                 current_point(1,1)*[1,1],[-1,1],'Color',color_value);
             
-            % Shift the patch and its two audio lines under the audio 
-            % signal axes and 
+            % Shift the patch and its two audio lines under the signal axes 
             uistack(audio_patch,'bottom')
             uistack(audio_line1,'bottom')
             uistack(audio_line2,'bottom')
@@ -471,7 +469,7 @@ audio_line2 = [];
             enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
             iptSetPointerBehavior(audio_line1,enterFcn);
             iptSetPointerBehavior(audio_line2,enterFcn);
-            iptSetPointerBehavior(audiosignal_axes,enterFcn);
+            iptSetPointerBehavior(signal_axes,enterFcn);
             iptPointerManager(figure_object);
             
             % Add window button motion and up callback functions to the 
@@ -513,9 +511,9 @@ audio_line2 = [];
             if strcmp(selection_type,'normal')
                 
                 % Change the pointer to a hand when the mouse moves over
-                % the audio signal axes
+                % the signal axes
                 enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
-                iptSetPointerBehavior(audiosignal_axes,enterFcn);
+                iptSetPointerBehavior(signal_axes,enterFcn);
                 iptPointerManager(figure_object);
                 
                 % Add window button motion and up callback functions to 
@@ -544,8 +542,8 @@ audio_line2 = [];
         % Window button motion callback function for the figure
         function figurewindowbuttonmotionfcn(~,~,audio_linei)
             
-            % Location of the mouse pointer
-            current_point = audiosignal_axes.CurrentPoint;
+            % Location of the mouse pointer on the signal axes
+            current_point = signal_axes.CurrentPoint;
             
             % If the current point is out of the x-axis limits, return
             if current_point(1,1) < x_lim(1) || current_point(1,1) > x_lim(2)
@@ -580,9 +578,9 @@ audio_line2 = [];
         function figurewindowbuttonupfcn(~,~)
             
             % Change the pointer to a ibeam when the mouse moves over the 
-            % audio signal axes in the figure
+            % signal axes in the figure
             enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','ibeam');
-            iptSetPointerBehavior(audiosignal_axes,enterFcn);
+            iptSetPointerBehavior(signal_axes,enterFcn);
             iptPointerManager(figure_object);
             
             % Coordinates of the two audio lines of the audio patch
