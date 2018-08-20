@@ -2,6 +2,10 @@
 
 This repository contains a Matlab GUI which implements Zafar's audio player (Zap), featuring some practical functionalities such as a synchronized spectrogram, a select/drag tool, and a playback line.
 
+- [z Matlab GUI](#zap-matlab-gui)
+- [audio_file](#audio_file)
+- [Author](#author)
+
 ## zap Matlab GUI
 
 Coming soon.
