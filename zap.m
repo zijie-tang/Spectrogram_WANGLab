@@ -17,7 +17,7 @@ function zap
 %       http://zafarrafii.com
 %       https://github.com/zafarrafii
 %       https://www.linkedin.com/in/zafarrafii/
-%       08/17/18
+%       08/20/18
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -121,10 +121,13 @@ figure_object.Visible = 'on';
         % Matlab's spectrogram
         audio_spectrogram = spectrogram(mean(audio_signal,2),window_function,window_length-step_length);
         
+        % Number of time frames
+        number_times = size(audio_spectrogram,2);
+        
         % Magnitude spectrogram without DC component and mirrored 
         % frequencies
         audio_spectrogram = abs(audio_spectrogram(2:end,:));
-
+        
         % Plot the audio signal and make it unable to capture mouse clicks
         plot(signal_axes,1/sample_rate:1/sample_rate:number_samples/sample_rate,audio_signal, ...
             'PickableParts','none');
@@ -162,22 +165,21 @@ figure_object.Visible = 'on';
         figure_object.CloseRequestFcn = {@figurecloserequestfcn,audio_player};
         
         % Add clicked callback function to the play toggle button
-        play_toggle.ClickedCallback = {@playclickedcallback,mixture_player};
+        play_toggle.ClickedCallback = {@playclickedcallback,audio_player};
         
-        % Set a play audio on the signal axes using the audio player
-        playaudio(signal_axes,audio_player,play_toggle);
+        % Set a play audio tool on the signal axes using the audio player
+        playaudiotool(signal_axes,audio_player,play_toggle);
         
-        % Set a select audio on the mixture signal axes using the 
-        % audio player
-        selectaudio(mixturesignal_axes,mixture_player)
+        % Set a select audio tool on the signal axes using the audio player
+        selectaudiotool(signal_axes,audio_player)
         
-        
-        % ...
+        % Add clicked callback functions to the select, zoom, and pan 
+        % toggle buttons
         select_toggle.ClickedCallback = @selectclickedcallback;
         zoom_toggle.ClickedCallback = @zoomclickedcallback;
         pan_toggle.ClickedCallback = @panclickedcallback;
         
-        % Enable the play mixture, select, zoom, and pan toggle buttons
+        % Enable the play, select, zoom, and pan toggle buttons
         play_toggle.Enable = 'on';
         select_toggle.Enable = 'on';
         zoom_toggle.Enable = 'on';
@@ -284,13 +286,13 @@ function image_data = iconread(icon_name)
 end
 
 % Close request callback function for the figure
-function figurecloserequestfcn(~,~,mixture_player)
+function figurecloserequestfcn(~,~,audio_player)
 
 % If the playback is in progress
-if isplaying(mixture_player)
+if isplaying(audio_player)
     
     % Stop the audio
-    stop(mixture_player)
+    stop(audio_player)
     
 end
 
@@ -323,8 +325,8 @@ end
 
 end
 
-% Set a play audio tool on a audio signal axes using an audio player
-function playaudiotool(audiosignal_axes,audio_player,playaudio_toggle)
+% Set a play audio tool on the signal axes using the audio player
+function playaudiotool(signal_axes,audio_player,play_toggle)
 
 % Add callback functions to the audio player
 audio_player.StartFcn = @audioplayerstartfcn;
@@ -341,13 +343,13 @@ audio_line = [];
     function audioplayerstartfcn(~,~)
         
         % Change the play audio toggle button icon to a stop icon
-        playaudio_toggle.CData = stopicon;
+        play_toggle.CData = stopicon;
         
         % Sample range in samples from the audio player
         sample_range = audio_player.UserData;
         
         % Create an audio line on the audio signal axes
-        audio_line = line(audiosignal_axes,sample_range(1)/sample_rate*[1,1],[-1,1]);
+        audio_line = line(signal_axes,sample_range(1)/sample_rate*[1,1],[-1,1]);
         
     end
     
