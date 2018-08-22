@@ -36,10 +36,10 @@ Toolbar's toggle buttons:
 
 ### Select/Drag
 
-- If a left mouse click on the signal axes, creates a selection line; the audio will be played from the selection line to the end of the audio.
-- If a left mouse click and drag on the signal axes or on a selection line, creates a selection region; the audio will be played from the start to the end of the selection region.
-- If a left mouse click and drag on the edges of a selection region, resizes the selection region.
-- If a right mouse click on the signal axes, removes any selection line or region.
+- If a left mouse click is done on the signal axes, a selection line is created; the audio will be played from the selection line to the end of the audio.
+- If a left mouse click and drag is done on the signal axes or on a selection line, a selection region is created; the audio will be played from the start to the end of the selection region.
+- If a left mouse click and drag is done on the left or right boundary of a selection region, the selection region is resized.
+- If a right mouse click is done on the signal axes, any selection line or region is removed.
 
 <img src="images/zap_select1.png" width="1000">
 
