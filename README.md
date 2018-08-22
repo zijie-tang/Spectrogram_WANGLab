@@ -51,6 +51,8 @@ Toolbar's toggle buttons:
 
 ### Zoom
 
+- Turn zooming on or off or magnify by factor (see https://mathworks.com/help/matlab/ref/zoom.html)
+
 - Zoom in by positioning the mouse cursor where you want the center of the plot to be and either
 
   - Press the mouse button or
@@ -67,7 +69,7 @@ Toolbar's toggle buttons:
 
 - Double-clicking over an axes returns the axes to its initial zoom setting in both zoom-in and zoom-out modes.
 
-- If used on the signal axes, zoom in horizontally only; the horizontal limits of the signal and spectrogram axes will stay synchronized.
+- If used on the signal axes, zoom horizontally only; the horizontal limits of the signal and spectrogram axes will stay synchronized.
 
 
 <img src="images/zap_zoom1.png" width="1000">
@@ -76,8 +78,9 @@ Toolbar's toggle buttons:
 
 ### Pan
 
-- Pan ...
-; the horizontal limits of the signal and spectrogram axes will stay synchronized.
+- Pan view of graph interactively (see https://www.mathworks.com/help/matlab/ref/pan.html)
+
+- If used on the signal axes, pan horizontally only; the horizontal limits of the signal and spectrogram axes will stay synchronized.
 
 <img src="images/zap_pan1.png" width="1000">
 
