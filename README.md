@@ -32,7 +32,6 @@ Toolbar's toggle buttons:
 - If there is no selection line or region, the audio will be played from the start to the end; if there is a selection line, the audio will be played from the selection line to the end of the audio; if there is a selection region, the audio will be played from the start to the end of the selection region.
 
 <img src="images/zap_play1.png" width="1000">
-
 <img src="images/zap_play2.png" width="1000">
 
 ### Select/Drag
@@ -43,11 +42,8 @@ Toolbar's toggle buttons:
 - If a right mouse click is done on the signal axes, any selection line or region is removed.
 
 <img src="images/zap_select1.png" width="1000">
-
 <img src="images/zap_select2.png" width="1000">
-
 <img src="images/zap_drag1.png" width="1000">
-
 <img src="images/zap_drag2.png" width="1000">
 
 ### Zoom
@@ -57,7 +53,6 @@ Toolbar's toggle buttons:
 - If used on the signal axes, zoom horizontally only; the horizontal limits of the signal and spectrogram axes will stay synchronized.
 
 <img src="images/zap_zoom1.png" width="1000">
-
 <img src="images/zap_zoom2.png" width="1000">
 
 ### Pan
@@ -67,9 +62,7 @@ Toolbar's toggle buttons:
 - If used on the signal axes, pan horizontally only; the horizontal limits of the signal and spectrogram axes will stay synchronized.
 
 <img src="images/zap_pan1.png" width="1000">
-
 <img src="images/zap_pan2.png" width="1000">
-
 
 ## audio_file
 
