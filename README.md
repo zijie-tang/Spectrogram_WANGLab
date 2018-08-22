@@ -8,6 +8,8 @@ This repository contains a Matlab GUI which implements Zafar's audio player (Zap
 
 ## zap Matlab GUI
 
+Zap is a programmatic GUI which is self-explanatory, heavily commented, and fully modular. Parts of the code can be used for other GUIs, especially the `playaudiotool` function which displays a playback line as the playback is in progress and `selectaudiotool` which allows the user to place a selection line or a selection region on the audio.
+
 Toolbar's toggle buttons:
 
 - [Open](#open)
