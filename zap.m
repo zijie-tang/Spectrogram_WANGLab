@@ -14,7 +14,7 @@ function zap
 %       http://zafarrafii.com
 %       https://github.com/zafarrafii
 %       https://www.linkedin.com/in/zafarrafii/
-%       08/20/18
+%       08/21/18
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -341,8 +341,10 @@ audio_line = [];
     % Function to execute one time when the playback starts
     function audioplayerstartfcn(~,~)
         
-        % Change the play audio toggle button icon to a stop icon
+        % Change the play toggle button icon to a stop icon and the tool
+        % tip text to 'Stop'
         play_toggle.CData = stopicon;
+        play_toggle.TooltipString = 'Stop';
         
         % Sample range in samples from the audio player
         sample_range = audio_player.UserData;
@@ -355,8 +357,10 @@ audio_line = [];
     % Function to execute one time when playback stops
     function audioplayerstopfcn(~,~)
         
-        % Change the play audio toggle button icon to a play icon
+        % Change the play toggle button icon to a play icon and the tool
+        % tip text to 'Play'
         play_toggle.CData = playicon;
+        play_toggle.TooltipString = 'Play';
         
         % Delete the audio line
         delete(audio_line)
