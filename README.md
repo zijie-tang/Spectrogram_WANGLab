@@ -8,7 +8,23 @@ This repository contains a Matlab GUI which implements Zafar's audio player (Zap
 
 ## zap Matlab GUI
 
-Coming soon.
+### Open
+
+<img src="images/zap_open1.png" width="1000">
+
+<img src="images/zap_open2.png" width="1000">
+
+### Play/Stop
+
+### Select/Drag
+
+### Zoom
+
+### Pan
+
+
+
+###
 
 ## audio_file
 
