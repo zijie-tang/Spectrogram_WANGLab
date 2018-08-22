@@ -18,8 +18,7 @@ Toolbar's toggle buttons:
 
 ### Open
 
-- Select a WAVE or MP3 to open.
-- The audio can be multichannel.
+- Select a WAVE or MP3 to open (the audio can be multichannel).
 - Display the audio signal and the audio spectrogram (in dB); the horizontal limits of the signal and spectrogram axes will be synchronized, and will stay synchronized if a zoom or pan are applied on any of the axes.
 
 <img src="images/zap_open1.png" width="1000">
