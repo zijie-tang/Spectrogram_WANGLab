@@ -8,6 +8,8 @@ This repository contains a Matlab GUI which implements Zafar's audio player (Zap
 
 ## zap Matlab GUI
 
+Toolbar's toggle buttons:
+
 - [Open](#open)
 - [Play/Stop](#playstop)
 - [Select/Drag](#selectdrag)
@@ -16,11 +18,17 @@ This repository contains a Matlab GUI which implements Zafar's audio player (Zap
 
 ### Open
 
+- Select a WAVE or MP3 to open.
+- The audio can be multichannel.
+
 <img src="images/zap_open1.png" width="1000">
 <img src="images/zap_open2.png" width="1000">
 
-
 ### Play/Stop
+
+- Play and stop the audio.
+- A playback line will be displayed as the playback is in progress.
+- If there is no selection line or region, the whole audio will be played; if there is a selection line, the audio will be played from the selection line to the end of the audio; if there is a selection region, the audio will be played from the start to the end of the selection region.
 
 <img src="images/zap_play1.png" width="1000">
 
