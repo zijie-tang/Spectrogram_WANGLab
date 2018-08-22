@@ -26,15 +26,20 @@ Toolbar's toggle buttons:
 
 ### Play/Stop
 
-- Play and stop the audio.
+- Play the audio if the playback is not in progress; stop the audio if the playback is in progress.
 - A playback line will be displayed as the playback is in progress.
-- If there is no selection line or region, the whole audio will be played; if there is a selection line, the audio will be played from the selection line to the end of the audio; if there is a selection region, the audio will be played from the start to the end of the selection region.
+- If there is no selection line or region, the audio will be played from the start to the end; if there is a selection line, the audio will be played from the selection line to the end of the audio; if there is a selection region, the audio will be played from the start to the end of the selection region.
 
 <img src="images/zap_play1.png" width="1000">
 
 <img src="images/zap_play2.png" width="1000">
 
 ### Select/Drag
+
+- If a left mouse click on the signal axes, creates a selection line; the audio will be played from the selection line to the end of the audio.
+- If a left mouse click and drag on the signal axes or on a selection line, creates a selection region; the audio will be played from the start to the end of the selection region.
+- If a left mouse click and drag on the edges of a selection region, resizes the selection region.
+- If a right mouse click on the signal axes, removes any selection line or region.
 
 <img src="images/zap_select1.png" width="1000">
 
