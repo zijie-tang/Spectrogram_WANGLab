@@ -53,24 +53,7 @@ Toolbar's toggle buttons:
 
 - Turn zooming on or off or magnify by factor (see https://mathworks.com/help/matlab/ref/zoom.html)
 
-- Zoom in by positioning the mouse cursor where you want the center of the plot to be and either
-
-  - Press the mouse button or
-
-  - Rotate the mouse scroll wheel away from you (upward).
-
-- Zoom out by positioning the mouse cursor where you want the center of the plot to be and either
-
-  - Simultaneously press Shift and the mouse button, or
-
-  - Rotate the mouse scroll wheel toward you (downward).
-
-- Clicking and dragging over an axes when zooming in is enabled draws a rubberband box. When you release the mouse button, the axes zoom in to the region enclosed by the rubberband box.
-
-- Double-clicking over an axes returns the axes to its initial zoom setting in both zoom-in and zoom-out modes.
-
 - If used on the signal axes, zoom horizontally only; the horizontal limits of the signal and spectrogram axes will stay synchronized.
-
 
 <img src="images/zap_zoom1.png" width="1000">
 
