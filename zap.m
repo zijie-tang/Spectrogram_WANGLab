@@ -60,7 +60,7 @@ function zap
 %       http://zafarrafii.com
 %       https://github.com/zafarrafii
 %       https://www.linkedin.com/in/zafarrafii/
-%       08/21/18
+%       08/23/18
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -238,7 +238,9 @@ figure_object.Visible = 'on';
     % Clicked callback function for the select toggle button
     function selectclickedcallback(~,~)
         
-        % Change the zoom and pan toggle button states to off
+        % Keep the select toggle button state to on and change the zoom and 
+        % pan toggle button states to off
+        select_toggle.State = 'on';
         zoom_toggle.State = 'off';
         pan_toggle.State = 'off';
         
@@ -253,8 +255,10 @@ figure_object.Visible = 'on';
     % Clicked callback function for the zoom toggle button
     function zoomclickedcallback(~,~)
         
-        % Change the select and pan toggle button states to off
+        % Keep the zoom toggle button state to on and change the select and 
+        % pan toggle button states to off
         select_toggle.State = 'off';
+        zoom_toggle.State = 'on';
         pan_toggle.State = 'off';
         
         % Make the zoom enable on the current figure
@@ -272,9 +276,11 @@ figure_object.Visible = 'on';
     % Clicked callback function for the pan toggle button
     function panclickedcallback(~,~)
         
-        % Change the select and zoom toggle button states to off
+        % Keep the pan toggle button state to on and change the select and 
+        % zoom toggle button states to off
         select_toggle.State = 'off';
         zoom_toggle.State = 'off';
+        pan_toggle.State = 'on';
         
         % Turn the zoom off
         zoom off
