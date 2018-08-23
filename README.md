@@ -30,8 +30,7 @@ Toolbar's toggle buttons:
 - Play the audio if the playback is not in progress; stop the audio if the playback is in progress; a playback line will be displayed as the playback is in progress.
 - If there is no selection line or region, the audio will be played from the start to the end; if there is a selection line, the audio will be played from the selection line to the end of the audio; if there is a selection region, the audio will be played from the start to the end of the selection region.
 
-<img src="images/zap_play1.png" width="1000">
-<img src="images/zap_play2.png" width="1000">
+<img src="images/zap_play.gif" width="1000">
 
 ### Select/Drag
 
