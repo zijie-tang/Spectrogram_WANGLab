@@ -25,6 +25,7 @@ Toolbar's toggle buttons:
 
 <img src="images/zap_open1.png" width="1000">
 <img src="images/zap_open2.png" width="1000">
+<img src="images/zap_open.gif" width="1000">
 
 ### Play/Stop
 
