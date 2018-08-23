@@ -39,10 +39,7 @@ Toolbar's toggle buttons:
 - If a left mouse click and drag is done on the left or right boundary of a selection region, the selection region is resized.
 - If a right mouse click is done on the signal axes, any selection line or region is removed.
 
-<img src="images/zap_select1.png" width="1000">
-<img src="images/zap_select2.png" width="1000">
-<img src="images/zap_drag1.png" width="1000">
-<img src="images/zap_drag2.png" width="1000">
+<img src="images/zap_select.gif" width="1000">
 
 ### Zoom
 
@@ -50,8 +47,7 @@ Toolbar's toggle buttons:
 
 - If used on the signal axes, zoom horizontally only; the horizontal limits of the signal and spectrogram axes will stay synchronized.
 
-<img src="images/zap_zoom1.png" width="1000">
-<img src="images/zap_zoom2.png" width="1000">
+<img src="images/zap_zoom.gif" width="1000">
 
 ### Pan
 
@@ -59,8 +55,7 @@ Toolbar's toggle buttons:
 
 - If used on the signal axes, pan horizontally only; the horizontal limits of the signal and spectrogram axes will stay synchronized.
 
-<img src="images/zap_pan1.png" width="1000">
-<img src="images/zap_pan2.png" width="1000">
+<img src="images/zap_pan.gif" width="1000">
 
 ## audio_file
 
