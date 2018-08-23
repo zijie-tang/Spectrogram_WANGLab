@@ -116,8 +116,6 @@ spectrogram_axes = axes( ...
     'YTick',[], ...
     'Box','on');
 
-% [left, bottom, width, heigh]
-
 % Synchronize the x-axis limits of the signal and spectrogram axes
 linkaxes([signal_axes,spectrogram_axes],'x')
 
