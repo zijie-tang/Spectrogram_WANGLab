@@ -119,7 +119,7 @@ spectrogram_axes = axes( ...
 % Synchronize the x-axis limits of the signal and spectrogram axes
 linkaxes([signal_axes,spectrogram_axes],'x')
 
-% Change the pointer to a hand when the mouse moves over the signal axes
+% Change the pointer when the mouse moves over the signal axes
 enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','ibeam');
 iptSetPointerBehavior(signal_axes,enterFcn);
 iptPointerManager(figure_object);
