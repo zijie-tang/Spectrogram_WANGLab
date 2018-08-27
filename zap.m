@@ -60,7 +60,7 @@ function zap
 %       http://zafarrafii.com
 %       https://github.com/zafarrafii
 %       https://www.linkedin.com/in/zafarrafii/
-%       08/24/18
+%       08/27/18
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -92,25 +92,26 @@ select_toggle = uitoggletool(toolbar_object, ...
     'Separator','On', ...
     'CData',iconread('tool_pointer.png'), ...
     'TooltipString','Select', ...
-    'Enable','off');
+    'Enable','off', ...
+    'ClickedCallBack',@selectclickedcallback);
 zoom_toggle = uitoggletool(toolbar_object, ...
     'CData',iconread('tool_zoom_in.png'), ...
     'TooltipString','Zoom', ...
-    'Enable','off');
+    'Enable','off', ...
+    'ClickedCallBack',@zoomclickedcallback);
 pan_toggle = uitoggletool(toolbar_object, ...
     'CData',iconread('tool_hand.png'), ...
     'TooltipString','Pan', ...
-    'Enable','off');
+    'Enable','off', ...
+    'ClickedCallBack',@panclickedcallback);
 
 % Create signal and spectrogram axes
 signal_axes = axes( ...
-    'Units','normalized', ...
     'OuterPosition',[0,0.8,1,0.2], ...
     'XTick',[], ...
     'YTick',[], ...
     'Box','on');
 spectrogram_axes = axes( ...
-    'Units','normalized', ...
     'OuterPosition',[0,0,1,0.8], ...
     'XTick',[], ...
     'YTick',[], ...
@@ -133,7 +134,7 @@ figure_object.Visible = 'on';
         % Change toggle button state to off
         open_toggle.State = 'off';
         
-        % Open file selection dialog box
+        % Open file selection dialog box; return if cancel
         [audio_name,audio_path] = uigetfile({'*.wav';'*.mp3'}, ...
             'Select WAVE or MP3 File to Open');
         if isequal(audio_name,0)
@@ -161,15 +162,13 @@ figure_object.Visible = 'on';
         % overlap-add)
         step_length = window_length/2;
         
-        % Matlab's spectrogram
+        % Magnitude spectrogram without DC component and mirrored 
+        % frequencies
         audio_spectrogram = spectrogram(mean(audio_signal,2),window_function,window_length-step_length);
+        audio_spectrogram = abs(audio_spectrogram(2:end,:));
         
         % Number of time frames
         number_times = size(audio_spectrogram,2);
-        
-        % Magnitude spectrogram without DC component and mirrored 
-        % frequencies
-        audio_spectrogram = abs(audio_spectrogram(2:end,:));
         
         % Plot the audio signal and make it unable to capture mouse clicks
         plot(signal_axes,1/sample_rate:1/sample_rate:number_samples/sample_rate,audio_signal, ...
@@ -210,17 +209,10 @@ figure_object.Visible = 'on';
         % Add clicked callback function to the play toggle button
         play_toggle.ClickedCallback = {@playclickedcallback,audio_player};
         
-        % Set a play audio tool on the signal axes using the audio player
+        % Set a play and a select audio tool on the signal axes using the 
+        % audio player
         playaudiotool(signal_axes,audio_player,play_toggle);
-        
-        % Set a select audio tool on the signal axes using the audio player
         selectaudiotool(signal_axes,audio_player)
-        
-        % Add clicked callback functions to the select, zoom, and pan 
-        % toggle buttons
-        select_toggle.ClickedCallback = @selectclickedcallback;
-        zoom_toggle.ClickedCallback = @zoomclickedcallback;
-        pan_toggle.ClickedCallback = @panclickedcallback;
         
         % Enable the play, select, zoom, and pan toggle buttons
         play_toggle.Enable = 'on';
