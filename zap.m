@@ -167,7 +167,8 @@ figure_object.Visible = 'on';
         number_times = size(audio_spectrogram,2);
         
         % Plot the audio signal and make it unable to capture mouse clicks
-        plot(signal_axes,1/sample_rate:1/sample_rate:number_samples/sample_rate,audio_signal, ...
+        plot(signal_axes, ...
+            1/sample_rate:1/sample_rate:number_samples/sample_rate,audio_signal, ...
             'PickableParts','none');
         
         % Update the signal axes properties
@@ -373,7 +374,7 @@ audio_player.TimerFcn = @audioplayertimerfcn;
 % Sample rate in Hz from the audio player
 sample_rate = audio_player.SampleRate;
 
-% Initialize the play line as an empty array
+% Initialize the play line
 play_line = [];
 
     % Function to execute one time when the playback starts
@@ -471,7 +472,8 @@ select_line = gobjects(3,1);
             
             % Create a first line on the signal axes
             color_value1 = 0.5*[1,1,1];
-            select_line(1) = line(signal_axes,current_point(1,1)*[1,1],[-1,1],'Color',color_value1);
+            select_line(1) = line(signal_axes, ...
+                current_point(1,1)*[1,1],[-1,1],'Color',color_value1);
             
             % Create a second line and a patch with different colors
             color_value2 = 0.75*[1,1,1];
@@ -493,7 +495,7 @@ select_line = gobjects(3,1);
             select_line(3).PickableParts = 'none';
             
             % Change the pointer to a hand when the mouse moves over the 
-            % lines on the audio signal axes
+            % lines and the signal axes
             enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
             iptSetPointerBehavior(select_line(1),enterFcn);
             iptSetPointerBehavior(select_line(2),enterFcn);
@@ -577,7 +579,7 @@ select_line = gobjects(3,1);
                 
                 % Change the color of the first line to match the color of 
                 % the second line and the patch, and move it at the bottom 
-                % the current stack
+                % of the current stack
                 select_line(1).Color = color_value2;
                 uistack(select_line(1),'bottom')
                 
@@ -598,7 +600,7 @@ select_line = gobjects(3,1);
         function figurewindowbuttonupfcn(~,~)
             
             % Change the pointer to a ibeam when the mouse moves over the 
-            % signal axes in the figure
+            % signal axes
             enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','ibeam');
             iptSetPointerBehavior(signal_axes,enterFcn);
             iptPointerManager(figure_object);
@@ -608,7 +610,7 @@ select_line = gobjects(3,1);
             x_value2 = select_line(2).XData(1);
             
             % Update the sample range of the audio player in its user data 
-            % depending if the two lines have the same or diffferent 
+            % depending if the two lines have the same or different 
             % coordinates
             if x_value1 == x_value2
                 audio_player.UserData = [round(x_value1*sample_rate),number_samples];
