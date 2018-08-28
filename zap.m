@@ -60,7 +60,7 @@ function zap
 %       http://zafarrafii.com
 %       https://github.com/zafarrafii
 %       https://www.linkedin.com/in/zafarrafii/
-%       08/27/18
+%       08/28/18
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -205,10 +205,10 @@ figure_object.Visible = 'on';
         % Add clicked callback function to the play toggle button
         play_toggle.ClickedCallback = {@playclickedcallback,audio_player};
         
-        % Set a play and a select tool on the signal axes using the audio 
-        % player
-        playtool(signal_axes,audio_player,play_toggle);
-        selecttool(signal_axes,audio_player)
+        % Set a play line and a select line on the signal axes using the 
+        % audio player
+        playline(signal_axes,audio_player,play_toggle);
+        selectline(signal_axes,audio_player)
         
         % Enable the play, select, zoom, and pan toggle buttons
         play_toggle.Enable = 'on';
@@ -362,8 +362,8 @@ end
 
 end
 
-% Set a play tool on the signal axes using the audio player
-function playtool(signal_axes,audio_player,play_toggle)
+% Set a play line on the signal axes using the audio player
+function playline(signal_axes,audio_player,play_toggle)
 
 % Add callback functions to the audio player
 audio_player.StartFcn = @audioplayerstartfcn;
@@ -373,7 +373,7 @@ audio_player.TimerFcn = @audioplayertimerfcn;
 % Sample rate in Hz from the audio player
 sample_rate = audio_player.SampleRate;
 
-% Initialize the play line
+% Initialize the play line as an empty array
 play_line = [];
 
     % Function to execute one time when the playback starts
@@ -426,13 +426,14 @@ play_line = [];
 end
 
 % Set a select tool on the signal axes using the audio player
-function selecttool(signal_axes,audio_player)
+function selectline(signal_axes,audio_player)
 
 % Add mouse-click callback function to the signal axes
 signal_axes.ButtonDownFcn = @signalaxesbuttondownfcn;
 
-% Initialize the select lines (two lines and one patch)
-select_lines = gobjects(3,1);
+% Initialize the select line as an array for graphic objects (two lines and 
+% one patch)
+select_line = gobjects(3,1);
 
     % Mouse-click callback function for the signal axes
     function signalaxesbuttondownfcn(~,~)
@@ -463,45 +464,45 @@ select_lines = gobjects(3,1);
         % If click left mouse button
         if strcmp(selection_type,'normal')
             
-            % If not empty, delete the select lines
-            if ~isempty(select_lines)
-                delete(select_lines)
+            % If not empty, delete the select line
+            if ~isempty(select_line)
+                delete(select_line)
             end
             
             % Create a first line on the signal axes
-            color_value1 = [0,0,0];
-            select_lines(1) = line(signal_axes,current_point(1,1)*[1,1],[-1,1],'Color',color_value1);
+            color_value1 = 0.5*[1,1,1];
+            select_line(1) = line(signal_axes,current_point(1,1)*[1,1],[-1,1],'Color',color_value1);
             
             % Create a second line and a patch with different colors
             color_value2 = 0.75*[1,1,1];
-            select_lines(2) = line(signal_axes, ...
+            select_line(2) = line(signal_axes, ...
                 current_point(1,1)*[1,1],[-1,1],'Color',color_value2);
-            select_lines(3) = patch(signal_axes, ...
+            select_line(3) = patch(signal_axes, ...
                 current_point(1)*[1,1,1,1],[-1,1,1,-1],color_value2,'LineStyle','none');
             
             % Move the second line and the patch at the bottom of the 
             % current stack
-            uistack(select_lines(2),'bottom')
-            uistack(select_lines(3),'bottom')
+            uistack(select_line(2),'bottom')
+            uistack(select_line(3),'bottom')
             
             % Add mouse-click callback functions to the lines
-            select_lines(1).ButtonDownFcn = @selectlinebuttondownfcn;
-            select_lines(2).ButtonDownFcn = @selectlinebuttondownfcn;
+            select_line(1).ButtonDownFcn = @selectlinebuttondownfcn;
+            select_line(2).ButtonDownFcn = @selectlinebuttondownfcn;
             
             % Make the patch not able to capture mouse clicks
-            select_lines(3).PickableParts = 'none';
+            select_line(3).PickableParts = 'none';
             
             % Change the pointer to a hand when the mouse moves over the 
             % lines on the audio signal axes
             enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
-            iptSetPointerBehavior(select_lines(1),enterFcn);
-            iptSetPointerBehavior(select_lines(2),enterFcn);
+            iptSetPointerBehavior(select_line(1),enterFcn);
+            iptSetPointerBehavior(select_line(2),enterFcn);
             iptSetPointerBehavior(signal_axes,enterFcn);
             iptPointerManager(figure_object);
             
             % Add window button motion and up callback functions to the 
             % figure
-            figure_object.WindowButtonMotionFcn = {@figurewindowbuttonmotionfcn,select_lines(1)};
+            figure_object.WindowButtonMotionFcn = {@figurewindowbuttonmotionfcn,select_line(1)};
             figure_object.WindowButtonUpFcn = @figurewindowbuttonupfcn;
             
             % Update the start sample of the audio player in its user data 
@@ -510,9 +511,9 @@ select_lines = gobjects(3,1);
         % If click right mouse button
         elseif strcmp(selection_type,'alt')
             
-            % If not empty, delete the select lines
-            if ~isempty(select_lines)
-                delete(select_lines)
+            % If not empty, delete the select line
+            if ~isempty(select_line)
+                delete(select_line)
             end
             
             % Update the sample range of the audio player in its user data 
@@ -520,7 +521,7 @@ select_lines = gobjects(3,1);
             
         end
         
-        % Mouse-click callback function for the select lines
+        % Mouse-click callback function for the lines
         function selectlinebuttondownfcn(object_handle,~)
             
             % Mouse selection type
@@ -543,8 +544,8 @@ select_lines = gobjects(3,1);
             % If click right mouse button
             elseif strcmp(selection_type,'alt')
                 
-                % Delete the audio lines
-                delete(select_lines)
+                % Delete the select line
+                delete(select_line)
                 
                 % Update the sample range of the audio player in its user 
                 % data
@@ -568,17 +569,17 @@ select_lines = gobjects(3,1);
             % Update the coordinates of the line that has been clicked and 
             % the coordinates of the patch
             select_linei.XData = current_point(1,1)*[1,1];
-            select_lines(3).XData = [select_lines(1).XData,select_lines(2).XData];
+            select_line(3).XData = [select_line(1).XData,select_line(2).XData];
             
             % If the two lines are at different coordinates and the patch 
             % is a full rectangle
-            if select_lines(1).XData(1) ~= select_lines(2).XData(1)
+            if select_line(1).XData(1) ~= select_line(2).XData(1)
                 
                 % Change the color of the first line to match the color of 
-                % the second line and the patch, and move at the bottom the 
-                % current stack
-                select_lines(1).Color = color_value2;
-                uistack(select_lines(1),'bottom')
+                % the second line and the patch, and move it at the bottom 
+                % the current stack
+                select_line(1).Color = color_value2;
+                uistack(select_line(1),'bottom')
                 
             % If the two lines are at the same coordinates and the patch is 
             % a vertical line
@@ -586,8 +587,8 @@ select_lines = gobjects(3,1);
                 
                 % Change the color of the first line back, and move it at 
                 % the top of the current stack
-                select_lines(1).Color = color_value1;
-                uistack(select_lines(1),'top')
+                select_line(1).Color = color_value1;
+                uistack(select_line(1),'top')
                 
             end
             
@@ -603,8 +604,8 @@ select_lines = gobjects(3,1);
             iptPointerManager(figure_object);
             
             % Coordinates of the two lines
-            x_value1 = select_lines(1).XData(1);
-            x_value2 = select_lines(2).XData(1);
+            x_value1 = select_line(1).XData(1);
+            x_value2 = select_line(2).XData(1);
             
             % Update the sample range of the audio player in its user data 
             % depending if the two lines have the same or diffferent 
