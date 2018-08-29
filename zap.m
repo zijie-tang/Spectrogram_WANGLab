@@ -60,7 +60,7 @@ function zap
 %       http://zafarrafii.com
 %       https://github.com/zafarrafii
 %       https://www.linkedin.com/in/zafarrafii/
-%       08/28/18
+%       08/29/18
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -487,20 +487,19 @@ select_line = gobjects(3,1);
             uistack(select_line(2),'bottom')
             uistack(select_line(3),'bottom')
             
+            % Change the pointer to a hand when the mouse moves over the 
+            % lines
+            enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
+            iptSetPointerBehavior(select_line(1),enterFcn);
+            iptSetPointerBehavior(select_line(2),enterFcn);
+            iptPointerManager(figure_object);
+            
             % Add mouse-click callback functions to the lines
             select_line(1).ButtonDownFcn = @selectlinebuttondownfcn;
             select_line(2).ButtonDownFcn = @selectlinebuttondownfcn;
             
             % Make the patch not able to capture mouse clicks
             select_line(3).PickableParts = 'none';
-            
-            % Change the pointer to a hand when the mouse moves over the 
-            % lines and the signal axes
-            enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
-            iptSetPointerBehavior(select_line(1),enterFcn);
-            iptSetPointerBehavior(select_line(2),enterFcn);
-            iptSetPointerBehavior(signal_axes,enterFcn);
-            iptPointerManager(figure_object);
             
             % Add window button motion and up callback functions to the 
             % figure
