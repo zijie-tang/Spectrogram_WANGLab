@@ -531,8 +531,8 @@ select_line = gobjects(3,1);
             % If click left mouse button
             if strcmp(selection_type,'normal')
                 
-                % Change the pointer to a hand when the mouse moves over
-                % the signal axes
+                % Keep the pointer to a hand when the mouse moves over the 
+                % signal axes
                 enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
                 iptSetPointerBehavior(signal_axes,enterFcn);
                 iptPointerManager(figure_object);
