@@ -442,13 +442,16 @@ select_line = gobjects(3,1);
         % Location of the mouse pointer
         current_point = signal_axes.CurrentPoint;
         
-        % Minimum and maximum x and y-axis limits
-        x_lim = signal_axes.XLim;
-        y_lim = signal_axes.YLim;
+        % Sample rate and number of samples from the audio player
+        sample_rate = audio_player.SampleRate;
+        number_samples = audio_player.TotalSamples;
         
-        % If the current point is out of the axis limits, return
-        if current_point(1,1) < x_lim(1) || current_point(1,1) > x_lim(2) || ...
-                current_point(1,2) < y_lim(1) || current_point(1,2) > y_lim(2)
+        % Audio range in seconds
+        audio_range = [1/sample_rate,number_samples/sample_rate];
+        
+        % If the current point is out of the audio signal limits, return
+        if current_point(1,1) < audio_range(1) || current_point(1,1) > audio_range(2) || ...
+                current_point(1,2) < -1 || current_point(1,2) > 1
             return
         end
         
@@ -457,10 +460,6 @@ select_line = gobjects(3,1);
         
         % Mouse selection type
         selection_type = figure_object.SelectionType;
-        
-        % Sample rate and number of samples from the audio player
-        sample_rate = audio_player.SampleRate;
-        number_samples = audio_player.TotalSamples;
         
         % If click left mouse button
         if strcmp(selection_type,'normal')
@@ -488,10 +487,12 @@ select_line = gobjects(3,1);
             uistack(select_line(3),'bottom')
             
             % Change the pointer to a hand when the mouse moves over the 
-            % lines
+            % lines, the signal axes, or the figure object
             enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
             iptSetPointerBehavior(select_line(1),enterFcn);
             iptSetPointerBehavior(select_line(2),enterFcn);
+            iptSetPointerBehavior(signal_axes,enterFcn);
+            iptSetPointerBehavior(figure_object,enterFcn);
             iptPointerManager(figure_object);
             
             % Add mouse-click callback functions to the lines
@@ -531,10 +532,11 @@ select_line = gobjects(3,1);
             % If click left mouse button
             if strcmp(selection_type,'normal')
                 
-                % Keep the pointer to a hand when the mouse moves over the 
-                % signal axes
+                % Change the pointer to a hand when the mouse moves over 
+                % the signal axes or the figure object
                 enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
                 iptSetPointerBehavior(signal_axes,enterFcn);
+                iptSetPointerBehavior(figure_object,enterFcn);
                 iptPointerManager(figure_object);
                 
                 % Add window button motion and up callback functions to 
@@ -562,9 +564,12 @@ select_line = gobjects(3,1);
             % Location of the mouse pointer
             current_point = signal_axes.CurrentPoint;
             
-            % If the current point is out of the x-axis limits, return
-            if current_point(1,1) < x_lim(1) || current_point(1,1) > x_lim(2)
-                return
+            % If the current point is out of the audio signal x-axis 
+            % limits, change it into the x-axis limits
+            if current_point(1,1) < audio_range(1)
+                current_point(1,1) = audio_range(1);
+            elseif current_point(1,1) > audio_range(2)
+                current_point(1,1) = audio_range(2);
             end
             
             % Update the coordinates of the line that has been clicked and 
@@ -598,10 +603,14 @@ select_line = gobjects(3,1);
         % Window button up callback function for the figure
         function figurewindowbuttonupfcn(~,~)
             
-            % Change the pointer to a ibeam when the mouse moves over the 
-            % signal axes
+            % Change the pointer back to a ibeam and an arrow when the 
+            % mouse moves over the signal axes and the figure object,
+            % respectively
             enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','ibeam');
             iptSetPointerBehavior(signal_axes,enterFcn);
+            iptPointerManager(figure_object);
+            enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','arrow');
+            iptSetPointerBehavior(figure_object,enterFcn);
             iptPointerManager(figure_object);
             
             % Coordinates of the two lines
@@ -617,7 +626,6 @@ select_line = gobjects(3,1);
                 audio_player.UserData = round([x_value1,x_value2]*sample_rate);
             else
                 audio_player.UserData = round([x_value2,x_value1]*sample_rate);
-                
             end
             
             % Remove the window button motion and up callback functions of
