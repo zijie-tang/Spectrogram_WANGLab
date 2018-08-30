@@ -238,7 +238,7 @@ figure_object.Visible = 'on';
         pan off
         
     end
-
+    
     % Clicked callback function for the zoom toggle button
     function zoomclickedcallback(~,~)
         
@@ -259,7 +259,7 @@ figure_object.Visible = 'on';
         pan off
         
     end
-
+    
     % Clicked callback function for the pan toggle button
     function panclickedcallback(~,~)
         
@@ -447,7 +447,7 @@ select_line = gobjects(3,1);
         number_samples = audio_player.TotalSamples;
         
         % Audio range in seconds
-        audio_range = [1/sample_rate,number_samples/sample_rate];
+        audio_range = [1,number_samples]/sample_rate;
         
         % If the current point is out of the audio signal limits, return
         if current_point(1,1) < audio_range(1) || current_point(1,1) > audio_range(2) || ...
