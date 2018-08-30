@@ -60,7 +60,7 @@ function zap
 %       http://zafarrafii.com
 %       https://github.com/zafarrafii
 %       https://www.linkedin.com/in/zafarrafii/
-%       08/29/18
+%       08/30/18
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -446,11 +446,11 @@ select_line = gobjects(3,1);
         sample_rate = audio_player.SampleRate;
         number_samples = audio_player.TotalSamples;
         
-        % Audio range in seconds
-        audio_range = [1,number_samples]/sample_rate;
+        % Audio limits in seconds
+        audio_limits = [1,number_samples]/sample_rate;
         
-        % If the current point is out of the audio signal limits, return
-        if current_point(1,1) < audio_range(1) || current_point(1,1) > audio_range(2) || ...
+        % If the current point is out of the audio limits, return
+        if current_point(1,1) < audio_limits(1) || current_point(1,1) > audio_limits(2) || ...
                 current_point(1,2) < -1 || current_point(1,2) > 1
             return
         end
@@ -564,12 +564,12 @@ select_line = gobjects(3,1);
             % Location of the mouse pointer
             current_point = signal_axes.CurrentPoint;
             
-            % If the current point is out of the audio signal x-axis 
-            % limits, change it into the x-axis limits
-            if current_point(1,1) < audio_range(1)
-                current_point(1,1) = audio_range(1);
-            elseif current_point(1,1) > audio_range(2)
-                current_point(1,1) = audio_range(2);
+            % If the current point is out of the audio limits, change it 
+            % into the audio limits
+            if current_point(1,1) < audio_limits(1)
+                current_point(1,1) = audio_limits(1);
+            elseif current_point(1,1) > audio_limits(2)
+                current_point(1,1) = audio_limits(2);
             end
             
             % Update the coordinates of the line that has been clicked and 
