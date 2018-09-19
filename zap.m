@@ -1,66 +1,66 @@
 function zap
 % Zafar's audio player (Zap) graphical user interface (GUI).
 %
-%   Zap implements a simple audio player as a Matlab programmatic GUI. The 
-%   user can open a WAV or MP3 file, play/stop the audio, select/drag a 
-%   region to play, and zoom and pan on the axes. The code is 
-%   self-explanatory, heavily commented, and fully modular. Parts of the 
-%   code can be helpful for other GUIs, especially the playaudiotool 
-%   function which displays a playback line as the playback is in progress 
-%   and the selectaudiotool function which allows the user to create a 
+%   Zap implements a simple audio player as a Matlab programmatic GUI. The
+%   user can open a WAV or MP3 file, play/stop the audio, select/drag a
+%   region to play, and zoom and pan on the axes. The code is
+%   self-explanatory, heavily commented, and fully modular. Parts of the
+%   code can be helpful for other GUIs, especially the playaudiotool
+%   function which displays a playback line as the playback is in progress
+%   and the selectaudiotool function which allows the user to create a
 %   selection line or region on the audio to play.
-%   
+%
 %   Toolbar's toggle buttons:
-%   
+%
 %   - Open:
 %       - Select a WAVE or MP3 to open (the audio can be multichannel).
-%       - Display the audio signal and the audio spectrogram (in dB); the 
-%       horizontal limits of the signal and spectrogram axes will be 
-%       synchronized (and will stay synchronized if a zoom or pan is 
+%       - Display the audio signal and the audio spectrogram (in dB); the
+%       horizontal limits of the signal and spectrogram axes will be
+%       synchronized (and will stay synchronized if a zoom or pan is
 %       applied on any of the axes).
-%   
+%
 %   - Play/Stop:
-%       - Play the audio if the playback is not in progress; stop the audio 
-%       if the playback is in progress; a playback line will be displayed 
+%       - Play the audio if the playback is not in progress; stop the audio
+%       if the playback is in progress; a playback line will be displayed
 %       as the playback is in progress.
-%       - If there is no selection line or region, the audio will be played 
-%       from the start to the end; if there is a selection line, the audio 
-%       will be played from the selection line to the end of the audio; if 
-%       there is a selection region, the audio will be played from the 
+%       - If there is no selection line or region, the audio will be played
+%       from the start to the end; if there is a selection line, the audio
+%       will be played from the selection line to the end of the audio; if
+%       there is a selection region, the audio will be played from the
 %       start to the end of the selection region.
-%   
+%
 %   - Select/Drag:
-%       - If a left mouse click is done on the signal axes, a selection 
-%       line is created; the audio will be played from the selection line 
+%       - If a left mouse click is done on the signal axes, a selection
+%       line is created; the audio will be played from the selection line
 %       to the end of the audio.
-%       - If a left mouse click and drag is done on the signal axes or on a 
-%       selection line, a selection region is created; the audio will be 
+%       - If a left mouse click and drag is done on the signal axes or on a
+%       selection line, a selection region is created; the audio will be
 %       played from the start to the end of the selection region.
-%       - If a left mouse click and drag is done on the left or right 
+%       - If a left mouse click and drag is done on the left or right
 %       boundary of a selection region, the selection region is resized.
-%       - If a right mouse click is done on the signal axes, any selection 
+%       - If a right mouse click is done on the signal axes, any selection
 %       line or region is removed.
-%       
+%
 %   - Zoom:
-%       - Turn zooming on or off or magnify by factor 
+%       - Turn zooming on or off or magnify by factor
 %       (see https://mathworks.com/help/matlab/ref/zoom.html)
-%       - If used on the signal axes, zoom horizontally only; the 
-%       horizontal limits of the signal and spectrogram axes will stay 
+%       - If used on the signal axes, zoom horizontally only; the
+%       horizontal limits of the signal and spectrogram axes will stay
 %       synchronized.
-%   
+%
 %   - Pan:
-%       - Pan view of graph interactively 
+%       - Pan view of graph interactively
 %       (see https://www.mathworks.com/help/matlab/ref/pan.html)
-%       - If used on the signal axes, pan horizontally only; the horizontal 
+%       - If used on the signal axes, pan horizontally only; the horizontal
 %       limits of the signal and spectrogram axes will stay synchronized.
-%   
+%
 %   Author:
 %       Zafar Rafii
 %       zafarrafii@gmail.com
 %       http://zafarrafii.com
 %       https://github.com/zafarrafii
 %       https://www.linkedin.com/in/zafarrafii/
-%       08/30/18
+%       09/19/18
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -69,39 +69,45 @@ screen_size = get(0,'ScreenSize');
 figure_object = figure( ...
     'Visible','off', ...
     'Position',[screen_size(3:4)/4+1,screen_size(3:4)/2], ...
-    'Name','Zafar''s Audio Player', ...
+    'Name','ZAP', ...
     'NumberTitle','off', ...
-    'MenuBar','none');
+    'MenuBar','none', ...
+    'CloseRequestFcn',@figurecloserequestfcn);
 
 % Create toolbar on figure
 toolbar_object = uitoolbar(figure_object);
 
+% Play and stop icons for the play audio toggle buttons
+play_icon = playicon;
+stop_icon = stopicon;
+
 % Create open and play toggle buttons on toolbar
 open_toggle = uitoggletool(toolbar_object, ...
     'CData',iconread('file_open.png'), ...
-    'TooltipString','Open', ...
+    'Tooltip','Open', ...
     'Enable','on', ...
     'ClickedCallback',@openclickedcallback);
 play_toggle = uitoggletool(toolbar_object, ...
     'CData',playicon, ...
-    'TooltipString','Play', ...
-    'Enable','off');
+    'Tooltip','Play', ...
+    'Enable','off', ...
+    'UserData',struct('PlayIcon',play_icon,'StopIcon',stop_icon));
 
 % Create pointer, zoom, and hand toggle buttons on toolbar
 select_toggle = uitoggletool(toolbar_object, ...
     'Separator','On', ...
     'CData',iconread('tool_pointer.png'), ...
-    'TooltipString','Select', ...
+    'Tooltip','Select', ...
     'Enable','off', ...
     'ClickedCallBack',@selectclickedcallback);
 zoom_toggle = uitoggletool(toolbar_object, ...
     'CData',iconread('tool_zoom_in.png'), ...
-    'TooltipString','Zoom', ...
+    'Tooltip','Zoom', ...
     'Enable','off', ...
     'ClickedCallBack',@zoomclickedcallback);
 pan_toggle = uitoggletool(toolbar_object, ...
     'CData',iconread('tool_hand.png'), ...
-    'TooltipString','Pan', ...
+    'Tooltip','Pan', ...
     'Enable','off', ...
     'ClickedCallBack',@panclickedcallback);
 
@@ -121,9 +127,12 @@ enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','ibeam');
 iptSetPointerBehavior(signal_axes,enterFcn);
 iptPointerManager(figure_object);
 
+% Initialize the audio player (for the figure's close request callback)
+audio_player = audioplayer(0,80);
+
 % Make the figure visible
 figure_object.Visible = 'on';
-    
+
     % Clicked callback function for the open toggle button
     function openclickedcallback(~,~)
         
@@ -137,28 +146,34 @@ figure_object.Visible = 'on';
             return
         end
         
+        % Clear all the (old) axes and hide them
+        cla(signal_axes)
+        signal_axes.Visible = 'off';
+        cla(spectrogram_axes)
+        spectrogram_axes.Visible = 'off';
+        
         % Build full file name
         audio_file = fullfile(audio_path,audio_name);
-
+        
         % Read audio file and return sample rate in Hz
         [audio_signal,sample_rate] = audioread(audio_file);
         
         % Number of samples
         number_samples = size(audio_signal,1);
-
-        % Window length in samples (audio stationary around 40 ms and power 
+        
+        % Window length in samples (audio stationary around 40 ms and power
         % of 2 for fast FFT and constant overlap-add)
         window_length = 2.^nextpow2(0.04*sample_rate);
-
-        % Window function ('periodic' Hamming window for constant 
+        
+        % Window function ('periodic' Hamming window for constant
         % overlap-add)
         window_function = hamming(window_length,'periodic');
-
-        % Step length (half the (even) window length for constant 
+        
+        % Step length (half the (even) window length for constant
         % overlap-add)
         step_length = window_length/2;
         
-        % Magnitude spectrogram without DC component and mirrored 
+        % Magnitude spectrogram without DC component and mirrored
         % frequencies
         audio_spectrogram = spectrogram(mean(audio_signal,2),window_function,window_length-step_length);
         audio_spectrogram = abs(audio_spectrogram(2:end,:));
@@ -179,6 +194,8 @@ figure_object.Visible = 'on';
         signal_axes.Title.Interpreter = 'None';
         signal_axes.XLabel.String = 'Time (s)';
         signal_axes.Layer = 'top';
+        signal_axes.UserData.PlotXLim = [1,number_samples]/sample_rate;
+        signal_axes.UserData.SelectXLim = [1,number_samples]/sample_rate;
         
         % Display the audio spectrogram (in dB)
         imagesc(spectrogram_axes, ...
@@ -187,29 +204,24 @@ figure_object.Visible = 'on';
             db(audio_spectrogram))
         
         % Update the spectrogram axes properties
-        spectrogram_axes.Colormap = jet;
+        spectrogram_axes.XLim = [1,number_samples]/sample_rate;
         spectrogram_axes.YDir = 'normal';
         spectrogram_axes.XGrid = 'on';
+        spectrogram_axes.Colormap = jet;
         spectrogram_axes.Title.String = 'Spectrogram (dB)';
         spectrogram_axes.XLabel.String = 'Time (s)';
         spectrogram_axes.YLabel.String = 'Frequency (Hz)';
+        drawnow
         
         % Create object for playing audio
         audio_player = audioplayer(audio_signal,sample_rate);
         
-        % Store the sample range in the user data of the audio player
-        audio_player.UserData = [1,number_samples];
-        
-        % Add close request callback function to the figure object
-        figure_object.CloseRequestFcn = {@figurecloserequestfcn,audio_player};
+        % Set a play line and a select line on the signal axes
+        selectline(signal_axes)
+        playline(signal_axes,audio_player,play_toggle);
         
         % Add clicked callback function to the play toggle button
-        play_toggle.ClickedCallback = {@playclickedcallback,audio_player};
-        
-        % Set a play line and a select line on the signal axes using the 
-        % audio player
-        playline(signal_axes,audio_player,play_toggle);
-        selectline(signal_axes,audio_player)
+        play_toggle.ClickedCallback = {@playclickedcallback,audio_player,signal_axes};
         
         % Enable the play, select, zoom, and pan toggle buttons
         play_toggle.Enable = 'on';
@@ -221,11 +233,11 @@ figure_object.Visible = 'on';
         select_toggle.State = 'on';
         
     end
-
+    
     % Clicked callback function for the select toggle button
     function selectclickedcallback(~,~)
         
-        % Keep the select toggle button state to on and change the zoom and 
+        % Keep the select toggle button state to on and change the zoom and
         % pan toggle button states to off
         select_toggle.State = 'on';
         zoom_toggle.State = 'off';
@@ -238,11 +250,11 @@ figure_object.Visible = 'on';
         pan off
         
     end
-    
+
     % Clicked callback function for the zoom toggle button
     function zoomclickedcallback(~,~)
         
-        % Keep the zoom toggle button state to on and change the select and 
+        % Keep the zoom toggle button state to on and change the select and
         % pan toggle button states to off
         select_toggle.State = 'off';
         zoom_toggle.State = 'on';
@@ -259,11 +271,11 @@ figure_object.Visible = 'on';
         pan off
         
     end
-    
+
     % Clicked callback function for the pan toggle button
     function panclickedcallback(~,~)
         
-        % Keep the pan toggle button state to on and change the select and 
+        % Keep the pan toggle button state to on and change the select and
         % zoom toggle button states to off
         select_toggle.State = 'off';
         zoom_toggle.State = 'off';
@@ -281,160 +293,76 @@ figure_object.Visible = 'on';
         
     end
 
-end
-
-% Create play icon
-function image_data = playicon
-
-    % Create the upper-half of a black play triangle with NaN's everywhere 
-    % else
-    image_data = [nan(2,16);[nan(6,3),kron(triu(nan(6,5)),ones(1,2)),nan(6,3)]];
-
-    % Make the whole black play triangle image
-    image_data = repmat([image_data;image_data(end:-1:1,:)],[1,1,3]);
-
-end
- 
-% Create stop icon
-function image_data = stopicon
-
-    % Create a black stop square with NaN's everywhere else
-    image_data = nan(16,16);
-    image_data(4:13,4:13) = 0;
-
-    % Make the black stop square an image
-    image_data = repmat(image_data,[1,1,3]);
-
-end
-
-% Read icon from Matlab
-function image_data = iconread(icon_name)
-
-    % Read icon image from Matlab ([16x16x3] 16-bit PNG) and also return 
-    % its transparency ([16x16] AND mask)
-    [image_data,~,image_transparency] ...
-        = imread(fullfile(matlabroot,'toolbox','matlab','icons',icon_name),'PNG');
-
-    % Convert the image to double precision (in [0,1])
-    image_data = im2double(image_data);
-
-    % Convert the 0's to NaN's in the image using the transparency
-    image_data(image_transparency==0) = NaN;
-
-end
-
-% Close request callback function for the figure
-function figurecloserequestfcn(~,~,audio_player)
-
-% If the playback is in progress
-if isplaying(audio_player)
-    
-    % Stop the audio
-    stop(audio_player)
-    
-end
-
-% Delete the current figure
-delete(gcf)
-
-end
-
-% Clicked callback function for the play toggle button
-function playclickedcallback(object_handle,~,audio_player)
-
-% Change the toggle button state to off
-object_handle.State = 'off';
-
-% If the playback of the audio player is in progress
-if isplaying(audio_player)
-    
-    % Stop the playback
-    stop(audio_player)
-    
-else
-    
-    % Get the sample range of the audio player from its user data 
-    sample_range = audio_player.UserData;
-    
-    % Play the audio given the sample range
-    play(audio_player,sample_range)
-    
-end
-
-end
-
-% Set a play line on the signal axes using the audio player
-function playline(signal_axes,audio_player,play_toggle)
-
-% Add callback functions to the audio player
-audio_player.StartFcn = @audioplayerstartfcn;
-audio_player.StopFcn = @audioplayerstopfcn;
-audio_player.TimerFcn = @audioplayertimerfcn;
-
-% Sample rate in Hz from the audio player
-sample_rate = audio_player.SampleRate;
-
-% Initialize the play line
-play_line = [];
-
-    % Function to execute one time when the playback starts
-    function audioplayerstartfcn(~,~)
+    % Close request callback function for the figure
+    function figurecloserequestfcn(~,~)
         
-        % Change the play toggle button icon to a stop icon and the tool 
-        % tip text to 'Stop'
-        play_toggle.CData = stopicon;
-        play_toggle.TooltipString = 'Stop';
+        % If any audio is playing, stop it
+        if isplaying(audio_player)
+            stop(audio_player)
+        end
         
-        % Get the sample range of the audio player from its user data
-        sample_range = audio_player.UserData;
-        
-        % Create a play line on the audio signal axes
-        play_line = line(signal_axes,sample_range(1)/sample_rate*[1,1],[-1,1]);
-        
-    end
-    
-    % Function to execute one time when playback stops
-    function audioplayerstopfcn(~,~)
-        
-        % Change the play toggle button icon to a play icon and the tool 
-        % tip text to 'Play'
-        play_toggle.CData = playicon;
-        play_toggle.TooltipString = 'Play';
-        
-        % Delete the play line
-        delete(play_line)
-        
-    end
-    
-    % Function to execute repeatedly during playback
-    function audioplayertimerfcn(~,~)
-        
-        % Current sample and sample range from the audio player
-        current_sample = audio_player.CurrentSample;
-        sample_range = audio_player.UserData;
-        
-        % Make sure the current sample is greater than the start sample (to
-        % prevent the play line from showing up at the start at the end)
-        if current_sample > sample_range(1)
-        
-            % Update the play line
-            play_line.XData = current_sample/sample_rate*[1,1];
-            
+        % Create question dialog box to close the figure
+        user_answer = questdlg('Close ZAP?',...
+            'Close ZAP','Yes','No','Yes');
+        switch user_answer
+            case 'Yes'
+                delete(figure_object)
+            case 'No'
+                return
         end
         
     end
 
 end
 
-% Set a select tool on the signal axes using the audio player
-function selectline(signal_axes,audio_player)
+% Read icon from Matlab
+function image_data = iconread(icon_name)
+
+% Read icon image from Matlab ([16x16x3] 16-bit PNG) and also return
+% its transparency ([16x16] AND mask)
+[image_data,~,image_transparency] ...
+    = imread(fullfile(matlabroot,'toolbox','matlab','icons',icon_name),'PNG');
+
+% Convert the image to double precision (in [0,1])
+image_data = im2double(image_data);
+
+% Convert the 0's to NaN's in the image using the transparency
+image_data(image_transparency==0) = NaN;
+
+end
+
+% Create play icon
+function image_data = playicon
+
+% Create the upper-half of a black play triangle with NaN's everywhere else
+image_data = [nan(2,16);[nan(6,3),kron(triu(nan(6,5)),ones(1,2)),nan(6,3)]];
+
+% Make the whole black play triangle image
+image_data = repmat([image_data;image_data(end:-1:1,:)],[1,1,3]);
+
+end
+
+% Create stop icon
+function image_data = stopicon
+
+% Create a black stop square with NaN's everywhere else
+image_data = nan(16,16);
+image_data(4:13,4:13) = 0;
+
+% Make the black stop square an image
+image_data = repmat(image_data,[1,1,3]);
+
+end
+
+% Set a select line on the signal axes
+function selectline(signal_axes)
+
+% Initialize the select line as an array for graphic objects (two lines and
+% one patch)
+select_line = gobjects(3,1);
 
 % Add mouse-click callback function to the signal axes
 signal_axes.ButtonDownFcn = @signalaxesbuttondownfcn;
-
-% Initialize the select line as an array for graphic objects (two lines and 
-% one patch)
-select_line = gobjects(3,1);
 
     % Mouse-click callback function for the signal axes
     function signalaxesbuttondownfcn(~,~)
@@ -442,15 +370,11 @@ select_line = gobjects(3,1);
         % Location of the mouse pointer
         current_point = signal_axes.CurrentPoint;
         
-        % Sample rate and number of samples from the audio player
-        sample_rate = audio_player.SampleRate;
-        number_samples = audio_player.TotalSamples;
+        % Plot limits from the audio signal axes' user data
+        plot_limits = signal_axes.UserData.PlotXLim;
         
-        % Audio limits in seconds
-        audio_limits = [1,number_samples]/sample_rate;
-        
-        % If the current point is out of the audio limits, return
-        if current_point(1,1) < audio_limits(1) || current_point(1,1) > audio_limits(2) || ...
+        % If the current point is out of the plot limits, return
+        if current_point(1,1) < plot_limits(1) || current_point(1,1) > plot_limits(2) || ...
                 current_point(1,2) < -1 || current_point(1,2) > 1
             return
         end
@@ -469,25 +393,29 @@ select_line = gobjects(3,1);
                 delete(select_line)
             end
             
-            % Create a first line on the signal axes
+            % Create a first line on the audio signal axes
             color_value1 = 0.5*[1,1,1];
             select_line(1) = line(signal_axes, ...
-                current_point(1,1)*[1,1],[-1,1],'Color',color_value1);
+                current_point(1,1)*[1,1],[-1,1], ...
+                'Color',color_value1, ...
+                'ButtonDownFcn',@selectlinebuttondownfcn);
             
-            % Create a second line and a patch with different colors
+            % Create a second line and a non-clickable patch with different
+            % colors and move them at the bottom of the current stack
             color_value2 = 0.75*[1,1,1];
             select_line(2) = line(signal_axes, ...
-                current_point(1,1)*[1,1],[-1,1],'Color',color_value2);
-            select_line(3) = patch(signal_axes, ...
-                current_point(1)*[1,1,1,1],[-1,1,1,-1],color_value2,'LineStyle','none');
-            
-            % Move the second line and the patch at the bottom of the 
-            % current stack
+                current_point(1,1)*[1,1],[-1,1], ...
+                'Color',color_value2, ...
+                'ButtonDownFcn',@selectlinebuttondownfcn);
             uistack(select_line(2),'bottom')
+            select_line(3) = patch(signal_axes, ...
+                current_point(1,1)*[1,1,1,1],[-1,1,1,-1],color_value2, ...
+                'LineStyle','none', ...
+                'PickableParts','none');
             uistack(select_line(3),'bottom')
             
-            % Change the pointer to a hand when the mouse moves over the 
-            % lines, the signal axes, or the figure object
+            % Change the pointer when the mouse moves over the lines, the
+            % signal axes, and the figure object
             enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
             iptSetPointerBehavior(select_line(1),enterFcn);
             iptSetPointerBehavior(select_line(2),enterFcn);
@@ -495,20 +423,13 @@ select_line = gobjects(3,1);
             iptSetPointerBehavior(figure_object,enterFcn);
             iptPointerManager(figure_object);
             
-            % Add mouse-click callback functions to the lines
-            select_line(1).ButtonDownFcn = @selectlinebuttondownfcn;
-            select_line(2).ButtonDownFcn = @selectlinebuttondownfcn;
-            
-            % Make the patch not able to capture mouse clicks
-            select_line(3).PickableParts = 'none';
-            
-            % Add window button motion and up callback functions to the 
+            % Add window button motion and up callback functions to the
             % figure
             figure_object.WindowButtonMotionFcn = {@figurewindowbuttonmotionfcn,select_line(1)};
             figure_object.WindowButtonUpFcn = @figurewindowbuttonupfcn;
             
-            % Update the start sample of the audio player in its user data 
-            audio_player.UserData(1) = round(current_point(1,1)*sample_rate);
+            % Update the select limits in the signal axes' user data
+            signal_axes.UserData.SelectXLim = current_point(1,1)*[1,1];
             
         % If click right mouse button
         elseif strcmp(selection_type,'alt')
@@ -518,8 +439,8 @@ select_line = gobjects(3,1);
                 delete(select_line)
             end
             
-            % Update the sample range of the audio player in its user data 
-            audio_player.UserData = [1,number_samples];
+            % Update the select limits in the signal axes' user data
+            signal_axes.UserData.SelectXLim = plot_limits;
             
         end
         
@@ -532,14 +453,14 @@ select_line = gobjects(3,1);
             % If click left mouse button
             if strcmp(selection_type,'normal')
                 
-                % Change the pointer to a hand when the mouse moves over 
-                % the signal axes or the figure object
+                % Change the pointer when the mouse moves over the signal 
+                % axes or the figure object
                 enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','hand');
                 iptSetPointerBehavior(signal_axes,enterFcn);
                 iptSetPointerBehavior(figure_object,enterFcn);
                 iptPointerManager(figure_object);
                 
-                % Add window button motion and up callback functions to 
+                % Add window button motion and up callback functions to
                 % the figure
                 figure_object.WindowButtonMotionFcn = {@figurewindowbuttonmotionfcn,object_handle};
                 figure_object.WindowButtonUpFcn = @figurewindowbuttonupfcn;
@@ -550,9 +471,8 @@ select_line = gobjects(3,1);
                 % Delete the select line
                 delete(select_line)
                 
-                % Update the sample range of the audio player in its user 
-                % data
-                audio_player.UserData = [1,number_samples];
+                % Update the select limits in the signal axes' user data
+                signal_axes.UserData.SelectXLim = plot_limits;
                 
             end
             
@@ -564,35 +484,35 @@ select_line = gobjects(3,1);
             % Location of the mouse pointer
             current_point = signal_axes.CurrentPoint;
             
-            % If the current point is out of the audio limits, change it 
-            % into the audio limits
-            if current_point(1,1) < audio_limits(1)
-                current_point(1,1) = audio_limits(1);
-            elseif current_point(1,1) > audio_limits(2)
-                current_point(1,1) = audio_limits(2);
+            % If the current point is out of the plot limits, change it 
+            % into the plot limits
+            if current_point(1,1) < plot_limits(1)
+                current_point(1,1) = plot_limits(1);
+            elseif current_point(1,1) > plot_limits(2)
+                current_point(1,1) = plot_limits(2);
             end
             
-            % Update the coordinates of the line that has been clicked and 
-            % the coordinates of the patch
+            % Update the coordinates of the audio line that has been
+            % clicked and the coordinates of the audio patch
             select_linei.XData = current_point(1,1)*[1,1];
             select_line(3).XData = [select_line(1).XData,select_line(2).XData];
             
-            % If the two lines are at different coordinates and the patch 
+            % If the two lines are at different coordinates and the patch
             % is a full rectangle
             if select_line(1).XData(1) ~= select_line(2).XData(1)
                 
-                % Change the color of the first line to match the color of 
-                % the second line and the patch, and move it at the bottom 
+                % Change the color of the first line to match the color of
+                % the second line and the patch, and move it at the bottom
                 % of the current stack
                 select_line(1).Color = color_value2;
                 uistack(select_line(1),'bottom')
                 
-            % If the two lines are at the same coordinates and the patch is 
+            % If the two lines are at the same coordinates and the patch is
             % a vertical line
             else
                 
-                % Change the color of the first line back, and move it at 
-                % the top of the current stack
+                % Change the color of the first line back, and move
+                % it at the top of the current stack
                 select_line(1).Color = color_value1;
                 uistack(select_line(1),'top')
                 
@@ -603,9 +523,8 @@ select_line = gobjects(3,1);
         % Window button up callback function for the figure
         function figurewindowbuttonupfcn(~,~)
             
-            % Change the pointer back to a ibeam and an arrow when the 
-            % mouse moves over the signal axes and the figure object,
-            % respectively
+            % Change the pointer back when the mouse moves over the signal 
+            % axes and the figure object
             enterFcn = @(figure_handle, currentPoint) set(figure_handle,'Pointer','ibeam');
             iptSetPointerBehavior(signal_axes,enterFcn);
             iptPointerManager(figure_object);
@@ -613,19 +532,19 @@ select_line = gobjects(3,1);
             iptSetPointerBehavior(figure_object,enterFcn);
             iptPointerManager(figure_object);
             
-            % Coordinates of the two lines
+            % Coordinates of the two audio lines
             x_value1 = select_line(1).XData(1);
             x_value2 = select_line(2).XData(1);
             
-            % Update the sample range of the audio player in its user data 
-            % depending if the two lines have the same or different 
+            % Update the select limits in the audio signal axes' user data
+            % depending if the two lines have the same or different
             % coordinates
             if x_value1 == x_value2
-                audio_player.UserData = [round(x_value1*sample_rate),number_samples];
+                signal_axes.UserData.SelectXLim = [x_value1,x_value1];
             elseif x_value1 < x_value2
-                audio_player.UserData = round([x_value1,x_value2]*sample_rate);
+                signal_axes.UserData.SelectXLim = [x_value1,x_value2];
             else
-                audio_player.UserData = round([x_value2,x_value1]*sample_rate);
+                signal_axes.UserData.SelectXLim = [x_value2,x_value1];
             end
             
             % Remove the window button motion and up callback functions of
@@ -639,3 +558,109 @@ select_line = gobjects(3,1);
 
 end
 
+% Set a play line on the signal axes using the audio player
+function playline(signal_axes,audio_player,play_toggle)
+
+% Play and stop icons from the play toggle buttons' user data
+play_icon = play_toggle.UserData.PlayIcon;
+stop_icon = play_toggle.UserData.StopIcon;
+
+% Sample rate in Hz from the audio player
+sample_rate = audio_player.SampleRate;
+
+% Get the plot limits from the signal axes' user data
+plot_limits = signal_axes.UserData.PlotXLim;
+
+% Initialize the play line
+play_line = [];
+
+% Add callback functions to the audio player
+audio_player.StartFcn = @audioplayerstartfcn;
+audio_player.StopFcn = @audioplayerstopfcn;
+audio_player.TimerFcn = @audioplayertimerfcn;
+
+    % Function to execute one time when the playback starts
+    function audioplayerstartfcn(~,~)
+        
+        % Change the play toggle button icon to a stop icon and the tooltip 
+        % to 'Stop'
+        play_toggle.CData = stop_icon;
+        play_toggle.Tooltip = 'Stop';
+        
+        % Get the select limits from the signal axes' user data
+        select_limits = signal_axes.UserData.SelectXLim;
+        
+        % Create a play line on the signal axes
+        play_line = line(signal_axes,select_limits(1)*[1,1],[-1,1]);
+        
+    end
+
+    % Function to execute one time when playback stops
+    function audioplayerstopfcn(~,~)
+        
+        % Change the play toggle button icon to a play icon and the tooltip 
+        % to 'Play'
+        play_toggle.CData = play_icon;
+        play_toggle.Tooltip = 'Play';
+        
+        % Delete the play line
+        delete(play_line)
+        
+    end
+
+    % Function to execute repeatedly during playback
+    function audioplayertimerfcn(~,~)
+        
+        % Current sample and sample range from the audio player
+        current_sample = audio_player.CurrentSample;
+        
+        % Make sure the current sample is only increasing (to prevent the
+        % play line from showing up at the start when the playback is over)
+        if current_sample > 1
+            
+            % Update the play line
+            play_line.XData = (plot_limits(1)+current_sample/sample_rate)*[1,1];
+            
+        end
+        
+    end
+
+end
+
+% Clicked callback function for the play toggle button
+function playclickedcallback(object_handle,~,audio_player,signal_axes)
+
+% Change the toggle button state to off
+object_handle.State = 'off';
+
+% If the playback is in progress
+if isplaying(audio_player)
+    
+    % Stop the audio
+    stop(audio_player)
+    
+else
+    
+    % Sample rate and number of samples from the audio player
+    sample_rate = audio_player.SampleRate;
+    number_samples = audio_player.TotalSamples;
+    
+    % Plot and select limits from the signal axes' user data
+    plot_limits = signal_axes.UserData.PlotXLim;
+    select_limits = signal_axes.UserData.SelectXLim;
+    
+    % Derive the sample range for the audio player
+    if select_limits(1) == select_limits(2)
+        % If it is a select line
+        sample_range = [round((select_limits(1)-plot_limits(1))*sample_rate)+1,number_samples];
+    else
+        % If it is a select region
+        sample_range = round((select_limits-plot_limits(1))*sample_rate+1);
+    end
+    
+    % Play the audio given the sample range
+    play(audio_player,sample_range)
+    
+end
+
+end
