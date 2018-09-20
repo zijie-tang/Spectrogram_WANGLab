@@ -20,8 +20,8 @@ Toolbar's toggle buttons:
 
 ### Open
 
-- Select a WAVE or MP3 to open (the audio can be multichannel).
-- Display the audio signal and the audio spectrogram (in dB); the horizontal limits of the signal and spectrogram axes will be synchronized (and will stay synchronized if a zoom or pan is applied on any of the axes).
+- Select a WAVE or MP3 to open; the audio can be mono or stereo.
+- Display the audio signal and the audio spectrogram; the x-axis limits of the signal and spectrogram axes will be synchronized (and will stay synchronized if a zoom or pan is applied on any of the axes).
 
 <img src="images/zap_open.gif" width="1000">
 
