@@ -45,7 +45,7 @@ Toolbar's toggle buttons:
 
 - Turn zooming on or off or magnify by factor (see https://mathworks.com/help/matlab/ref/zoom.html)
 
-- If used on the signal axes, zoom horizontally only; the horizontal limits of the signal and spectrogram axes will stay synchronized.
+- If used on the signal axes, zoom horizontally only; the x-axis limits of the signal axes and the spectrogram axes will stay synchronized.
 
 <img src="images/zap_zoom.gif" width="1000">
 
@@ -53,7 +53,7 @@ Toolbar's toggle buttons:
 
 - Pan view of graph interactively (see https://www.mathworks.com/help/matlab/ref/pan.html)
 
-- If used on the signal axes, pan horizontally only; the horizontal limits of the signal and spectrogram axes will stay synchronized.
+- If used on the signal axes, pan horizontally only; the x-axis limits of the signal axes and the spectrogram axes will stay synchronized.
 
 <img src="images/zap_pan.gif" width="1000">
 
