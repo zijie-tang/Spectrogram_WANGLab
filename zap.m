@@ -60,7 +60,7 @@ function zap
 %       http://zafarrafii.com
 %       https://github.com/zafarrafii
 %       https://www.linkedin.com/in/zafarrafii/
-%       09/20/18
+%       10/05/18
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -139,10 +139,18 @@ figure_object.Visible = 'on';
         % Change toggle button state to off
         open_toggle.State = 'off';
         
+        % Remove the figure's close request callback so that it allows
+        % all the other objects to get created before it can get closed
+        figure_object.CloseRequestFcn = '';
+        
+        % Change the pointer symbol while the figure is busy
+        figure_object.Pointer = 'watch';
+        
         % Open file selection dialog box; return if cancel
         [audio_name,audio_path] = uigetfile({'*.wav';'*.mp3'}, ...
             'Select WAVE or MP3 File to Open');
-        if isequal(audio_name,0)
+        if isequal(audio_name,0) || isequal(audio_path,0)
+            figure_object.CloseRequestFcn = @figurecloserequestfcn;
             return
         end
         
@@ -231,6 +239,12 @@ figure_object.Visible = 'on';
         
         % Change the select toggle button states to on
         select_toggle.State = 'on';
+        
+        % Add the figure's close request callback back
+        figure_object.CloseRequestFcn = @figurecloserequestfcn;
+        
+        % Change the pointer symbol back
+        figure_object.Pointer = 'arrow';
         
     end
     
