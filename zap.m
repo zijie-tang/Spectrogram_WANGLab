@@ -28,6 +28,7 @@ function zap
 %       will be played from the selection line to the end of the audio; if
 %       there is a selection region, the audio will be played from the
 %       start to the end of the selection region.
+%       - Pressing the space key will also play and stop the audio.
 %
 %   - Select/Drag:
 %       - If a left mouse click is done on the signal axes, a selection
@@ -60,7 +61,7 @@ function zap
 %       http://zafarrafii.com
 %       https://github.com/zafarrafii
 %       https://www.linkedin.com/in/zafarrafii/
-%       10/05/18
+%       10/18/18
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -145,6 +146,7 @@ figure_object.Visible = 'on';
         
         % Change the pointer symbol while the figure is busy
         figure_object.Pointer = 'watch';
+        drawnow
         
         % Open file selection dialog box; return if cancel
         [audio_name,audio_path] = uigetfile({'*.wav';'*.mp3'}, ...
@@ -159,6 +161,7 @@ figure_object.Visible = 'on';
         signal_axes.Visible = 'off';
         cla(spectrogram_axes)
         spectrogram_axes.Visible = 'off';
+        drawnow
         
         % Build full file name
         audio_file = fullfile(audio_path,audio_name);
@@ -204,6 +207,7 @@ figure_object.Visible = 'on';
         signal_axes.Layer = 'top';
         signal_axes.UserData.PlotXLim = [1,number_samples]/sample_rate;
         signal_axes.UserData.SelectXLim = [1,number_samples]/sample_rate;
+        drawnow
         
         % Display the audio spectrogram (in dB)
         imagesc(spectrogram_axes, ...
@@ -231,6 +235,9 @@ figure_object.Visible = 'on';
         % Add clicked callback function to the play toggle button
         play_toggle.ClickedCallback = {@playclickedcallback,audio_player,signal_axes};
         
+        % Add key-press callback functions to the figure
+        figure_object.KeyPressFcn  = @keypressfcncallback;
+        
         % Enable the play, select, zoom, and pan toggle buttons
         play_toggle.Enable = 'on';
         select_toggle.Enable = 'on';
@@ -245,6 +252,7 @@ figure_object.Visible = 'on';
         
         % Change the pointer symbol back
         figure_object.Pointer = 'arrow';
+        drawnow
         
     end
     
@@ -306,7 +314,47 @@ figure_object.Visible = 'on';
         setAxesPanConstraint(pan_object,signal_axes,'x');
         
     end
-
+    
+    % Key-press callback function to the figure
+    function keypressfcncallback(~,~)
+        
+        % If the current character is the space character
+        if ~strcmp(' ',figure_object.CurrentCharacter)
+            return
+        end
+        
+        % If the playback is in progress
+        if isplaying(audio_player)
+            
+            % Stop the audio
+            stop(audio_player)
+            
+        else
+            
+            % Sample rate and number of samples from the audio player
+            sample_rate = audio_player.SampleRate;
+            number_samples = audio_player.TotalSamples;
+            
+            % Plot and select limits from the signal axes' user data
+            plot_limits = signal_axes.UserData.PlotXLim;
+            select_limits = signal_axes.UserData.SelectXLim;
+            
+            % Derive the sample range for the audio player
+            if select_limits(1) == select_limits(2)
+                % If it is a select line
+                sample_range = [round((select_limits(1)-plot_limits(1))*sample_rate)+1,number_samples];
+            else
+                % If it is a select region
+                sample_range = round((select_limits-plot_limits(1))*sample_rate+1);
+            end
+            
+            % Play the audio given the sample range
+            play(audio_player,sample_range)
+            
+        end
+        
+    end
+    
     % Close request callback function for the figure
     function figurecloserequestfcn(~,~)
         
