@@ -155,6 +155,7 @@ figure_object.Visible = 'on';
             
             % Change the pointer symbol back
             figure_object.Pointer = 'arrow';
+            drawnow
             
             return
         end
