@@ -60,7 +60,8 @@ Functionalities:
 
 - Zafar Rafii
 - zafarrafii@gmail.com
-- [Website](http://zafarrafii.com/)
+- http://zafarrafii.com/
 - [CV](http://zafarrafii.com/Zafar%20Rafii%20-%20C.V..pdf)
-- [Google Scholar](https://scholar.google.com/citations?user=8wbS2EsAAAAJ&hl=en)
+- [GitHub](https://github.com/zafarrafii)
 - [LinkedIn](https://www.linkedin.com/in/zafarrafii/)
+- [Google Scholar](https://scholar.google.com/citations?user=8wbS2EsAAAAJ&hl=en)
