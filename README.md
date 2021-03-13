@@ -2,7 +2,7 @@
 
 Matlab GUI which implements Zafar's audio player (Zap), featuring some practical functionalities such as a synchronized spectrogram, a select/drag tool, and a playback line.
 
-## zap
+## zap.m
 
 Zap implements a simple audio player as a Matlab programmatic GUI. The user can open a WAV or MP3 file, play/stop the audio, select/drag a region to play, and zoom and pan on the axes. The code is self-explanatory, heavily commented, and fully modular. Parts of the code can be helpful for other GUIs, especially the `playtool` function which displays a playback line as the playback is in progress and the `selecttool` function which allows the user to create a selection line or region on the audio to play.
 
@@ -52,11 +52,11 @@ Functionalities:
 
 <img src="images/zap_pan.gif" width="1000">
 
-## audio_file
+## audio_file.wav
 
 - Tamy - Que Pena / Tanto Faz (excerpt)
 
-## Author
+# Author
 
 - Zafar Rafii
 - zafarrafii@gmail.com
