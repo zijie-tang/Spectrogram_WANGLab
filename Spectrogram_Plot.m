@@ -1,4 +1,4 @@
-function zap
+function Spectrogram_Plot
 % Zafar's audio player (Zap) graphical user interface (GUI).
 %
 %   Zap implements a simple audio player as a Matlab programmatic GUI. The
