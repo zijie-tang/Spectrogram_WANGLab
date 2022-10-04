@@ -60,7 +60,7 @@ Functionalities:
 ### Save
 
 - save view of graph (see https://www.mathworks.com/help/matlab/ref/imwrite.html)
-- Firstly, save the figure above and then save the figure below.
+- Save the figure above and then save the figure below.
 
 <img src="images/save.gif" width="1000">
 
@@ -74,4 +74,3 @@ Functionalities:
 - zijietang0316@gmail.com
 - [GitHub](https://github.com/zijietang0316)
 - [LinkedIn](https://www.linkedin.com/in/zijie-tang-4ba81b240/)
-- [Google Scholar](https://scholar.google.com/citations?user=8wbS2EsAAAAJ&hl=en)
