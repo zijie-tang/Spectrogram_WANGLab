@@ -1,7 +1,7 @@
 function Spectrogram_Plot
-% Zafar's audio player (Zap) graphical user interface (GUI).
+% Zafar's audio player (Spectrogram_Plot) graphical user interface (GUI).
 %
-%   Zap implements a simple audio player as a Matlab programmatic GUI. The
+%   Spectrogram_Plot implements a simple audio player as a Matlab programmatic GUI. The
 %   user can open a WAV or MP3 file, play/stop the audio, select/drag a
 %   region to play, and zoom and pan on the axes. The code is
 %   self-explanatory, heavily commented, and fully modular. Parts of the
@@ -69,10 +69,10 @@ screen_size = get(0,'ScreenSize');
 % Create figure window
 figure_object = figure( ...
     'Visible','off', ...
-    'Position',[screen_size(3:4)/4+1,screen_size(3)/2,screen_size(4)/1.5], ...
+    'Position',[screen_size(3)/4,screen_size(4)/10,screen_size(3)/2,screen_size(4)/1.2], ...
     'Name','Spectrogram_Plot', ...
     'NumberTitle','off', ...
-    'MenuBar','figure', ...
+    'MenuBar','None', ...
     'CloseRequestFcn',@figurecloserequestfcn);
 
 % Create toolbar on figure
@@ -112,6 +112,12 @@ pan_button = uitoggletool(toolbar_object, ...
     'Enable','off', ...
     'ClickedCallBack',@panclickedcallback);
 
+save_button = uitoggletool(toolbar_object, ...
+    'CData',iconread('file_save.png'), ...
+    'TooltipString','Save', ...
+    'Enable','off', ...
+    'ClickedCallBack',@saveclickedcallback);
+
 % Create signal and spectrogram axes
 signal_axes = axes( ...
     'OuterPosition',[0,0.5,1,0.5], ...
@@ -134,9 +140,15 @@ audio_player = audioplayer(0,80);
 % Make the figure visible
 figure_object.Visible = 'on';
 
+% this is my save button
+    
+    function saveclickedcallback(~,~)
+        axes2image(signal_axes);
+        axes2image(spectrogram_axes);
+    end
+    
     % Clicked callback function for the open button
     function openclickedcallback(~,~)
-        
         % Open file selection dialog box; return if cancel
         [audio_name,audio_path] = uigetfile({'*.wav';'*.mp3'}, ...
             'Select WAVE or MP3 File to Open');
@@ -156,7 +168,7 @@ figure_object.Visible = 'on';
         if isplaying(audio_player)
             stop(audio_player)
         end
-        
+
         % Clear all the (old) axes and hide them
         cla(signal_axes)
         signal_axes.Visible = 'off';
@@ -192,12 +204,14 @@ figure_object.Visible = 'on';
         
         % Number of time frames
         number_times = size(audio_spectrogram,2);
-        
+
         % Plot the audio signal and make it unable to capture mouse clicks
         plot(signal_axes, ...
             1/sample_rate:1/sample_rate:number_samples/sample_rate,audio_signal, ...
             'PickableParts','none');
-        
+
+        signal_axes.ColorOrder = [0.6 0.8 0.84;0.18 0.45 0.76];
+
         % Update the signal axes properties
         signal_axes.XLim = [1,number_samples]/sample_rate;
         signal_axes.YLim = [-1,1];
@@ -214,8 +228,10 @@ figure_object.Visible = 'on';
         imagesc(spectrogram_axes, ...
             [1,number_times]/number_times*number_samples/sample_rate, ...
             [1,window_length/2]/window_length*sample_rate, ...
-            db(audio_spectrogram))
-        
+            db(audio_spectrogram),'PickableParts','none')
+
+        colorbar
+
         % Update the spectrogram axes properties
         spectrogram_axes.XLim = [1,number_samples]/sample_rate;
         spectrogram_axes.YDir = 'normal';
@@ -243,6 +259,7 @@ figure_object.Visible = 'on';
         play_button.Enable = 'on';
         select_button.Enable = 'on';
         zoom_button.Enable = 'on';
+        save_button.Enable = 'on';
         pan_button.Enable = 'on';
         
         % Change the select button state to on
@@ -254,9 +271,9 @@ figure_object.Visible = 'on';
         % Change the pointer symbol back
         figure_object.Pointer = 'arrow';
         drawnow
-        
+       
     end
-    
+
     % Clicked callback function for the select button
     function selectclickedcallback(~,~)
         
@@ -365,8 +382,8 @@ figure_object.Visible = 'on';
         end
         
         % Create question dialog box to close the figure
-        user_answer = questdlg('Close ZAP?',...
-            'Close ZAP','Yes','No','Yes');
+        user_answer = questdlg('Close Spectrogram_Plot?',...
+            'Close Spectrogram_Plot','Yes','No','Yes');
         switch user_answer
             case 'Yes'
                 delete(figure_object)
@@ -415,6 +432,23 @@ image_data(4:13,4:13) = 0;
 % Make the black stop square an image
 image_data = repmat(image_data,[1,1,3]);
 
+end
+
+function fr=axes2image(ax)
+    filter={'*.png';'*.pdf';'*.fig';'*.jpg'};
+
+    [filepath,filename] = uiputfile(filter);
+
+    path_file = fullfile(filename,filepath);
+
+    hfig = ancestor(ax, 'figure');
+
+    rect = hgconvertunits(hfig, get(ax, 'OuterPosition'), ...
+                          get(ax, 'Units'), 'pixels', get(ax, 'Parent'));
+
+    fr = getframe(hfig, rect);
+
+    imwrite(fr.cdata, path_file);
 end
 
 % Set a select line on the signal axes
