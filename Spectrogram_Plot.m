@@ -1,9 +1,9 @@
 function Spectrogram_Plot
-% Zafar's audio player (Spectrogram_Plot) graphical user interface (GUI).
+% Zijie's audio player (Spectrogram_Plot) graphical user interface (GUI).
 %
 %   Spectrogram_Plot implements a simple audio player as a Matlab programmatic GUI. The
 %   user can open a WAV or MP3 file, play/stop the audio, select/drag a
-%   region to play, and zoom and pan on the axes. The code is
+%   region to play, zoom and pan on the axes and save the spectrograms. The code is
 %   self-explanatory, heavily commented, and fully modular. Parts of the
 %   code can be helpful for other GUIs, especially the playaudiotool
 %   function which displays a playback line as the playback is in progress
@@ -55,13 +55,18 @@ function Spectrogram_Plot
 %       - If used on the signal axes, pan horizontally only; the horizontal
 %       limits of the signal and spectrogram axes will stay synchronized.
 %
+%   - Save:
+%       - Save all the two axes spectrograms
+%       (see https://www.mathworks.com/help/matlab/ref/imwrite.html)
+%       - Save two axes spectrograms of signal_axes and spectrogram_axes,
+%       choose two save filepaths aspectively.
+%
 %   Author:
-%       Zafar Rafii
-%       zafarrafii@gmail.com
-%       http://zafarrafii.com
-%       https://github.com/zafarrafii
-%       https://www.linkedin.com/in/zafarrafii/
-%       10/22/18
+%       Zijie Tang
+%       zijie.tang@temple.edu
+%       https://github.com/ZijieTang0316
+%       https://www.linkedin.com/in/ZijieTang/
+%       10/03/22
 
 % Get screen size
 screen_size = get(0,'ScreenSize');
@@ -94,7 +99,7 @@ play_button = uipushtool(toolbar_object, ...
     'Enable','off', ...
     'UserData',struct('PlayIcon',play_icon,'StopIcon',stop_icon));
 
-% Create pointer, zoom, and hand toggle buttons on toolbar
+% Create pointer, zoom, hand and save toggle buttons on toolbar
 select_button = uitoggletool(toolbar_object, ...
     'Separator','On', ...
     'CData',iconread('tool_pointer.png'), ...
@@ -111,7 +116,6 @@ pan_button = uitoggletool(toolbar_object, ...
     'TooltipString','Pan', ...
     'Enable','off', ...
     'ClickedCallBack',@panclickedcallback);
-
 save_button = uitoggletool(toolbar_object, ...
     'CData',iconread('file_save.png'), ...
     'TooltipString','Save', ...
@@ -140,8 +144,7 @@ audio_player = audioplayer(0,80);
 % Make the figure visible
 figure_object.Visible = 'on';
 
-% this is my save button
-    
+    % Clicked callback function for the save button
     function saveclickedcallback(~,~)
         axes2image(signal_axes);
         axes2image(spectrogram_axes);
@@ -210,6 +213,7 @@ figure_object.Visible = 'on';
             1/sample_rate:1/sample_rate:number_samples/sample_rate,audio_signal, ...
             'PickableParts','none');
 
+        % set the color of two lines
         signal_axes.ColorOrder = [0.6 0.8 0.84;0.18 0.45 0.76];
 
         % Update the signal axes properties
@@ -229,7 +233,8 @@ figure_object.Visible = 'on';
             [1,number_times]/number_times*number_samples/sample_rate, ...
             [1,window_length/2]/window_length*sample_rate, ...
             db(audio_spectrogram),'PickableParts','none')
-
+        
+        % set the colorbar at the right side
         colorbar
 
         % Update the spectrogram axes properties
@@ -434,20 +439,17 @@ image_data = repmat(image_data,[1,1,3]);
 
 end
 
+% set the save filepath and save the spectrogram
 function fr=axes2image(ax)
     filter={'*.png';'*.pdf';'*.fig';'*.jpg'};
-
     [filepath,filename] = uiputfile(filter);
-
     path_file = fullfile(filename,filepath);
 
+    % transfer the figure into a new figure and save it
     hfig = ancestor(ax, 'figure');
-
     rect = hgconvertunits(hfig, get(ax, 'OuterPosition'), ...
                           get(ax, 'Units'), 'pixels', get(ax, 'Parent'));
-
     fr = getframe(hfig, rect);
-
     imwrite(fr.cdata, path_file);
 end
 
