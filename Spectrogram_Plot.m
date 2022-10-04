@@ -65,7 +65,7 @@ function Spectrogram_Plot
 %       Zijie Tang
 %       zijie.tang@temple.edu
 %       https://github.com/ZijieTang0316
-%       https://www.linkedin.com/in/ZijieTang/
+%       https://www.linkedin.com/in/zijie-tang-4ba81b240/
 %       10/03/22
 
 % Get screen size
@@ -441,7 +441,7 @@ end
 
 % set the save filepath and save the spectrogram
 function fr=axes2image(ax)
-    filter={'*.png';'*.pdf';'*.fig';'*.jpg'};
+    filter={'*.png';'*.pdf';'*.fig'};
     [filepath,filename] = uiputfile(filter);
     path_file = fullfile(filename,filepath);
 
