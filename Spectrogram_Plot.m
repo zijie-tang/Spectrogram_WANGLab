@@ -74,7 +74,7 @@ screen_size = get(0,'ScreenSize');
 % Create figure window
 figure_object = figure( ...
     'Visible','off', ...
-    'Position',[screen_size(3)/4,screen_size(4)/10,screen_size(3)/2,screen_size(4)/1.2], ...
+    'Position',[screen_size(3)/4,screen_size(4)/10,screen_size(3)/3,screen_size(4)/1.2], ...
     'Name','Spectrogram_Plot', ...
     'NumberTitle','off', ...
     'MenuBar','figure', ...
@@ -124,10 +124,13 @@ save_button = uitoggletool(toolbar_object, ...
 
 % Create signal and spectrogram axes
 signal_axes = axes( ...
-    'OuterPosition',[0,0.5,1,0.5], ...
+    'OuterPosition',[0,2/3,1,1/3], ...
     'Visible','off');
 spectrogram_axes = axes( ...
-    'OuterPosition',[0,0,1,0.5], ...
+    'OuterPosition',[0,1/3,1,1/3], ...
+    'Visible','off');
+MFCC_axes = axes( ...
+    'OuterPosition',[0,0,1,1/3], ...
     'Visible','off');
 
 % Synchronize the x-axis limits of the signal and spectrogram axes
@@ -153,8 +156,8 @@ figure_object.Visible = 'on';
     % Clicked callback function for the open button
     function openclickedcallback(~,~)
         % Open file selection dialog box; return if cancel
-        [audio_name,audio_path] = uigetfile({'*.wav';'*.mp3'}, ...
-            'Select WAVE or MP3 File to Open');
+        [audio_name,audio_path] = uigetfile({'*.wav';'*.mp3';'*.mp4'}, ...
+            'Select a File to Open');
         if isequal(audio_name,0) || isequal(audio_path,0)
             return
         end
@@ -208,13 +211,15 @@ figure_object.Visible = 'on';
         % Number of time frames
         number_times = size(audio_spectrogram,2);
 
+        
+
         % Plot the audio signal and make it unable to capture mouse clicks
         plot(signal_axes, ...
             1/sample_rate:1/sample_rate:number_samples/sample_rate,audio_signal, ...
             'PickableParts','none');
 
         % set the color of two lines
-        signal_axes.ColorOrder = [0.6 0.8 0.84;0.18 0.45 0.76];
+        signal_axes.ColorOrder = [0.18 0.45 0.76;0.6 0.8 0.84];
 
         % Update the signal axes properties
         signal_axes.XLim = [1,number_samples]/sample_rate;
@@ -223,6 +228,7 @@ figure_object.Visible = 'on';
         signal_axes.Title.String = audio_name;
         signal_axes.Title.Interpreter = 'None';
         signal_axes.XLabel.String = 'Time (s)';
+        signal_axes.YLabel.String = 'Amplitude';
         signal_axes.Layer = 'top';
         signal_axes.UserData.PlotXLim = [1,number_samples]/sample_rate;
         signal_axes.UserData.SelectXLim = [1,number_samples]/sample_rate;
@@ -247,6 +253,8 @@ figure_object.Visible = 'on';
         spectrogram_axes.YLabel.String = 'Frequency (Hz)';
         drawnow
         
+        
+
         % Create object for playing audio
         audio_player = audioplayer(audio_signal,sample_rate);
         
@@ -758,5 +766,7 @@ else
     play(audio_player,sample_range)
     
 end
+
+
 
 end
