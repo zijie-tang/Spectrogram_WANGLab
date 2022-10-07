@@ -74,7 +74,7 @@ screen_size = get(0,'ScreenSize');
 % Create figure window
 figure_object = figure( ...
     'Visible','off', ...
-    'Position',[screen_size(3)/4,screen_size(4)/10,screen_size(3)/3,screen_size(4)/1.2], ...
+    'Position',[screen_size(3)/4,screen_size(4)/10,screen_size(3)/2,screen_size(4)/1.2], ...
     'Name','Spectrogram_Plot', ...
     'NumberTitle','off', ...
     'MenuBar','figure', ...
@@ -122,13 +122,14 @@ save_button = uitoggletool(toolbar_object, ...
     'Enable','off', ...
     'ClickedCallBack',@saveclickedcallback);
 
-% Create signal and spectrogram axes
+% Create signal, spectrogram and MFCC axes
 signal_axes = axes( ...
     'OuterPosition',[0,2/3,1,1/3], ...
     'Visible','off');
 spectrogram_axes = axes( ...
     'OuterPosition',[0,1/3,1,1/3], ...
     'Visible','off');
+spectrogram_axes.Colormap
 MFCC_axes = axes( ...
     'OuterPosition',[0,0,1,1/3], ...
     'Visible','off');
@@ -151,6 +152,7 @@ figure_object.Visible = 'on';
     function saveclickedcallback(~,~)
         axes2image(signal_axes);
         axes2image(spectrogram_axes);
+        axes2image(MFCC_axes);
     end
     
     % Clicked callback function for the open button
@@ -210,16 +212,29 @@ figure_object.Visible = 'on';
         
         % Number of time frames
         number_times = size(audio_spectrogram,2);
-
         
+
+        % Compute the mel filterbank
+        audio_signal_filter=mean(audio_signal,2);
+        number_mels=36;
+        mel_filterbank=melfilterbank(sample_rate,window_length,number_mels);
+        % Compute the MFCCs using the filterbank
+        number_cofficients=18;
+        audio_mfcc=mfcc(audio_signal_filter,window_function,step_length,mel_filterbank,number_cofficients);
+        % Compute the delta and delta-delta MFCCs
+        audio_dmfcc=diff(audio_mfcc,1,2);
+        audio_ddmfcc=diff(audio_dmfcc,1,2);
+        % Display the MFCCs, delta MFCCs, and delta-delta MFCCs in seconds
+        xtick_step = 1;
+        number_samples = length(audio_signal_filter);
+        mfccshow(audio_mfcc,number_samples,sample_rate,xtick_step)
 
         % Plot the audio signal and make it unable to capture mouse clicks
         plot(signal_axes, ...
             1/sample_rate:1/sample_rate:number_samples/sample_rate,audio_signal, ...
             'PickableParts','none');
-
         % set the color of two lines
-        signal_axes.ColorOrder = [0.18 0.45 0.76;0.6 0.8 0.84];
+        signal_axes.ColorOrder = [0.6 0.8 0.84;0.18 0.45 0.76];
 
         % Update the signal axes properties
         signal_axes.XLim = [1,number_samples]/sample_rate;
@@ -233,15 +248,15 @@ figure_object.Visible = 'on';
         signal_axes.UserData.PlotXLim = [1,number_samples]/sample_rate;
         signal_axes.UserData.SelectXLim = [1,number_samples]/sample_rate;
         drawnow
+
+        % set the colorbar at the right side
+        colorbar();
         
         % Display the audio spectrogram (in dB)
         imagesc(spectrogram_axes, ...
             [1,number_times]/number_times*number_samples/sample_rate, ...
             [1,window_length/2]/window_length*sample_rate, ...
             db(audio_spectrogram),'PickableParts','none')
-        
-        % set the colorbar at the right side
-        colorbar
 
         % Update the spectrogram axes properties
         spectrogram_axes.XLim = [1,number_samples]/sample_rate;
@@ -252,7 +267,7 @@ figure_object.Visible = 'on';
         spectrogram_axes.XLabel.String = 'Time (s)';
         spectrogram_axes.YLabel.String = 'Frequency (Hz)';
         drawnow
-        
+         colorbar();
         
 
         % Create object for playing audio
@@ -405,6 +420,33 @@ figure_object.Visible = 'on';
         end
         
     end
+
+function mfccshow(audio_mfcc,number_samples,sampling_frequency,xtick_step)
+            % Set the default values for xtick_step
+            if nargin <= 4
+                xtick_step = 1;
+            end
+            
+            % Get the number of time frames
+            number_times = size(audio_mfcc,2);
+            
+            % Derive the number of seconds and the number of time frames per second
+            number_seconds = number_samples/sampling_frequency;
+            time_resolution = number_times/number_seconds;
+            
+            % Prepare the tick locations and labels for the x-axis
+            xtick_locations = xtick_step*time_resolution:xtick_step*time_resolution:number_times;
+            xtick_labels = xtick_step:xtick_step:number_seconds;
+            
+            % Display the MFCCs in seconds
+            imagesc(MFCC_axes,audio_mfcc)
+            axis xy
+            colormap(jet)
+            xticks(xtick_locations)
+            xticklabels(xtick_labels)
+            xlabel('Time (s)')
+            ylabel('Coefficients')
+     end
 
 end
 
@@ -766,7 +808,84 @@ else
     play(audio_player,sample_range)
     
 end
+end
 
+function audio_mfcc = mfcc(audio_signal,window_function, step_length, mel_filterbank,number_coefficients)
+        
+            % Compute the power spectrogram (without the DC component and the mirrored frequencies)
+            audio_stft = stft(audio_signal,window_function,step_length);
+            audio_spectrogram = abs(audio_stft(2:length(window_function)/2+1,:)).^2;
+            
+            %  Compute the discrete cosine transform of the log magnitude spectrogram 
+            % mapped onto the mel scale using the filter bank
+            audio_mfcc = dct(log(mel_filterbank*audio_spectrogram+eps));
+            audio_mfcc = audio_mfcc(2:number_coefficients+1,:);
+            
+end
 
+function audio_stft = stft(audio_signal,window_function,step_length)
+            % Get the number of samples and the window length in samples
+            number_samples = length(audio_signal);
+            window_length = length(window_function);
+            
+            % Derive the zero-padding length at the start and at the end of the signal to center the windows
+            padding_length = floor(window_length/2);
+            
+            % Compute the number of time frames given the zero-padding at the start and at the end of the signal
+            number_times = ceil(((number_samples+2*padding_length)-window_length)/step_length)+1;
+            
+            % Zero-pad the start and the end of the signal to center the windows
+            audio_signal = [zeros(padding_length,1);audio_signal; ...
+                zeros((number_times*step_length+(window_length-step_length)-padding_length)-number_samples,1)];
+            
+            % Initialize the STFT
+            audio_stft = zeros(window_length,number_times);
+            
+            % Loop over the time frames
+            i = 0;
+            for j = 1:number_times
+                
+                % Window the signal
+                audio_stft(:,j) = audio_signal(i+1:i+window_length).*window_function;
+                i = i+step_length;
+                
+            end
+            
+            % Compute the Fourier transform of the frames using the FFT
+            audio_stft = fft(audio_stft);
+            
+end
 
+function mel_filterbank = melfilterbank(sampling_frequency, window_length, number_filters)
+            
+            % Compute the minimum and maximum mels
+            minimum_melfrequency = 2595*log10(1+(sampling_frequency/window_length)/700);
+            maximum_melfrequency = 2595*log10(1+(sampling_frequency/2)/700);
+            
+            % Derive the width of the half-overlapping filters in the mel scale (constant)
+            filter_width = 2*(maximum_melfrequency-minimum_melfrequency)/(number_filters+1);
+            
+            % Compute the start and end indices of the overlapping filters in the mel scale (linearly spaced)
+            filter_indices = minimum_melfrequency:filter_width/2:maximum_melfrequency;
+            
+            % Derive the indices of the filters in the linear frequency scale (log spaced)
+            filter_indices = round(700*(10.^(filter_indices/2595)-1)*window_length/sampling_frequency);
+            
+            % Initialize the mel filterbank
+            mel_filterbank = zeros(number_filters,window_length/2);
+            
+            % Loop over the filters
+            for i = 1:number_filters
+                                
+                % Compute the left and right sides of the triangular filters
+                % (this is more accurate than creating triangular filters directly)
+                mel_filterbank(i,filter_indices(i):filter_indices(i+1)) ...
+                    = linspace(0,1,filter_indices(i+1)-filter_indices(i)+1);
+                mel_filterbank(i,filter_indices(i+1):filter_indices(i+2)) ...
+                    = linspace(1,0,filter_indices(i+2)-filter_indices(i+1)+1);
+            end
+            
+            % Make the mel filterbank sparse
+            mel_filterbank = sparse(mel_filterbank);
+            
 end
