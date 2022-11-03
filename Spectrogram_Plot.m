@@ -67,14 +67,35 @@ function Spectrogram_Plot
 %       https://github.com/ZijieTang0316
 %       https://www.linkedin.com/in/zijie-tang-4ba81b240/
 %       10/03/22
-
+filename="C:\Users\19713\Dropbox\project\Spectrogram_WANGLab\Counting-16-44p1-mono-15secs.wav";
+    [audio_signal,sample_rate] = audioread(filename);
+    window_length=1024;
+    step_length=window_length/2;
+    aFE = audioFeatureExtractor( ...
+        SampleRate=sample_rate, ...
+        Window=hamming(window_length,"periodic"), ...
+        OverlapLength=step_length, ...
+        mfcc=true, ...
+        pitch=true, ...
+        gtcc=true, ...
+        erbSpectrum=true, ...
+        harmonicRatio=true, ...
+        barkSpectrum=true);
+    features=extract(aFE,audio_signal);
+    idx=info(aFE);
+    handle=plotFeatures(aFE,audio_signal);
+    handle.Visible="on";
+    handle.OuterPosition;
+    handle.HandleVisibility="on";
+    drawnow
+    hold on;
 % Get screen size
 screen_size = get(0,'ScreenSize');
 
 % Create figure window
 figure_object = figure( ...
     'Visible','off', ...
-    'Position',[screen_size(3)/20,screen_size(4)/10,screen_size(3)/1.1,screen_size(4)/1.2], ...
+    'Position',[screen_size(3)/100,screen_size(4)/20,screen_size(3)/1.05,screen_size(4)/1.2], ...
     'Name','Spectrogram_Plot', ...
     'NumberTitle','off', ...
     'MenuBar','figure', ...
@@ -124,44 +145,59 @@ save_button = uitoggletool(toolbar_object, ...
 
 % Create signal, spectrogram and MFCC axes
 signal_axes = axes( ...
-    'OuterPosition',[0,2/3,1/3,1/3], ...
+    'OuterPosition',[0,2/3,1/4,1/3], ...
     'Visible','off');
 spectrogram_axes = axes( ...
-    'OuterPosition',[0,1/3,1/3,1/3], ...
+    'OuterPosition',[0,1/3,1/4,1/3], ...
     'Visible','off');
 
 % Power Spectral Density
 PSD_axes=axes( ...
-    'OuterPosition',[1/3,2/3,1/3,1/3], ...
+    'OuterPosition',[1/4,2/3,1/4,1/3], ...
     'Visible','off');
 
 % Zero Crossing Rate
 Zero_Crossing_Rate_axes=axes( ...
-    'OuterPosition',[1/3,1/3,1/3,1/3], ...
+    'OuterPosition',[1/4,1/3,1/4,1/3], ...
     'Visible','off');
 
 % Spectral Centroid
 Spectral_Centroid_axes=axes( ...
-    'OuterPosition',[1/3,0,1/3,1/3], ...
+    'OuterPosition',[1/4,0,1/4,1/3], ...
     'Visible','off');
 
 % Spectral Rolloff
-Spectral_rOLLOFF_axes=axes( ...
-    'OuterPosition',[2/3,2/3,1/3,1/3], ...
+Spectral_Rolloff_axes=axes( ...
+    'OuterPosition',[2/4,2/3,1/4,1/3], ...
     'Visible','off');
 
-% Feature Scaling
-Feature_Scaling_axes=axes( ...
-    'OuterPosition',[2/3,1/3,1/3,1/3], ...
+% RMS
+RMS_axes=axes( ...
+    'OuterPosition',[2/4,0,1/4,1/3], ...
     'Visible','off');
 
-% Chroma
-Chroma_axes=axes( ...
-    'OuterPosition',[2/3,0,1/3,1/3], ...
+% Pitch
+Pitch_axes=axes( ...
+    'OuterPosition',[2/4,1/3,1/4,1/3], ...
+    'Visible','off');
+
+% cqt
+CQT_axes=axes( ...
+    'OuterPosition',[3/4,2/3,1/4,1/3], ...
+    'Visible','off');
+
+% GTCC
+Harmonic_axes=axes( ...
+    'OuterPosition',[3/4,1/3,1/4,1/3], ...
+    'Visible','off');
+
+% Bark
+Bark_axes=axes( ...
+    'OuterPosition',[3/4,0,1/4,1/3], ...
     'Visible','off');
 
 MFCC_axes = axes( ...
-    'OuterPosition',[0,0,1/3,1/3], ...
+    'OuterPosition',[0,0,1/4,1/3], ...
     'Visible','off');
 
 
@@ -217,7 +253,8 @@ figure_object.Visible = 'on';
         
         % Build full file name
         audio_file = fullfile(audio_path,audio_name);
-        
+        %audio_name='experiment.wav';
+        %audio_file='C:\Users\19713\Dropbox\Spectrogram_WANGLab\experiment.wav';
         % Read audio file and return sample rate in Hz
         [audio_signal,sample_rate] = audioread(audio_file);
         
@@ -281,7 +318,6 @@ figure_object.Visible = 'on';
         drawnow
 
         % set the colorbar at the right side
-        colorbar();
         
         % Display the audio spectrogram (in dB)
         imagesc(spectrogram_axes, ...
@@ -299,6 +335,9 @@ figure_object.Visible = 'on';
         spectrogram_axes.YLabel.String = 'Frequency (Hz)';
         drawnow
         
+        axes(spectrogram_axes);
+        colorbar();
+
         % In order to conserve the total power, multiply all frequencies that occur in both sets — the positive and negative frequencies — by a factor of 2. Zero frequency (DC) and the Nyquist frequency do not occur twice.
         N=length(audio_signal);
         xdft = fft(audio_signal);
@@ -318,6 +357,75 @@ figure_object.Visible = 'on';
         Zero_Crossing_Rate_axes.Title.String = 'Zero-Crossing-Rate';
         Zero_Crossing_Rate_axes.XLabel.String = 'Time (ms)';
         Zero_Crossing_Rate_axes.YLabel.String = 'Rate';
+
+        % buffer the signal into 100 ms frames with 50 ms overlap
+        axes(Spectral_Centroid_axes);
+        audio_signal_Buffered=buffer(audio_signal,round(sample_rate*0.1),round(sample_rate*0.05),"nodelay");
+        [p,cf]=poctave(audio_signal_Buffered,sample_rate);
+        centroid=spectralCentroid(p,cf);
+        spectralCentroid(p,cf);
+        title('Spectral Centroid')
+
+        % Spectral_Rolloff
+        axes(Spectral_Rolloff_axes);
+        [s,cf,~]=melSpectrogram(audio_signal,sample_rate);
+        rolloffpoint=spectralRolloffPoint(s,cf);
+        spectralRolloffPoint(s,cf,Threshold=0.9,Window=round(sample_rate*0.1),OverlapLength=round(sample_rate*0.05));
+        title('Spectral Rolloff');
+
+        % Pitch
+        axes(Pitch_axes);
+        pitch(audio_signal,sample_rate,Method="SRH",WindowLength=window_length,OverlapLength=step_length);
+        title("Pitch")
+
+        % Root Mean Suare Energy
+        axes(RMS_axes)
+        x=size(audio_signal);
+        i=1+window_length;
+        RMS_audio_signal=zeros(round(size(audio_signal)/step_length));
+        RMS_audio_signal(1)=audio_signal(1);
+        j=1;
+        while(i<=x(1))
+            j=j+1;
+            RMS_audio_signal(j)=rms(audio_signal(i-window_length:i));
+            i=i+step_length;
+        end
+        RMS_audio_signal(end+1)=rms(audio_signal(i-window_length:end));
+        plot(RMS_axes,1/sample_rate:step_length/sample_rate:number_samples/sample_rate,RMS_audio_signal);
+        RMS_axes.XLim = [1,number_samples]/sample_rate;
+        RMS_axes.Title.String="RMS, window length=1024";
+        RMS_axes.XLabel.String="Time(s)";
+        RMS_axes.YLabel.String="Root-Mean-Square Energy";
+
+        % cqt
+        axes(CQT_axes);
+        cqt(audio_signal,'SamplingFrequency',sample_rate);
+        CQT_axes.XLabel.String="Time(s)";
+        
+        % harmonic ratio
+        axes(Harmonic_axes);
+        harmonicRatio(audio_signal,sample_rate, ...
+              Window=hann(window_length,"periodic"), ...
+              OverlapLength=step_length);
+        title("Harmonic ratio");
+        Harmonic_axes.XLabel.String="Time(s)";
+        Harmonic_axes.YLabel.String="Harmonic ratio";
+
+        aFE = audioFeatureExtractor( ...
+        SampleRate=sample_rate, ...
+        Window=hamming(window_length,"periodic"), ...
+        OverlapLength=step_length, ...
+        gtcc=true, ...
+        erbSpectrum=true, ...
+        barkSpectrum=true);
+        features=extract(aFE,audio_signal);
+        idx=info(aFE);
+        handle=plotFeatures(aFE,audio_signal);
+        handle.Visible="on";
+        handle.OuterPosition;
+        handle.HandleVisibility="on";
+        drawnow
+        hold on;
 
         % Create object for playing audio
         audio_player = audioplayer(audio_signal,sample_rate);
@@ -348,7 +456,6 @@ figure_object.Visible = 'on';
         % Change the pointer symbol back
         figure_object.Pointer = 'arrow';
         drawnow
-       
     end
 
     % Clicked callback function for the select button
@@ -476,6 +583,7 @@ function mfccshow(audio_mfcc,number_samples,sampling_frequency,xtick_step)
                 xtick_step = 1;
             end
             
+            axes(MFCC_axes);
             % Get the number of time frames
             number_times = size(audio_mfcc,2);
             
@@ -496,6 +604,7 @@ function mfccshow(audio_mfcc,number_samples,sampling_frequency,xtick_step)
             title('MFCCs')
             xlabel('Time (s)')
             ylabel('Coefficients')
+            colorbar();
      end
 
 end
