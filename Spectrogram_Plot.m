@@ -67,7 +67,7 @@ function Spectrogram_Plot
 %       https://github.com/ZijieTang0316
 %       https://www.linkedin.com/in/zijie-tang-4ba81b240/
 %       10/03/22
-filename="C:\Users\19713\Dropbox\project\Spectrogram_WANGLab\Counting-16-44p1-mono-15secs.wav";
+filename="Counting-16-44p1-mono-15secs.wav";
     [audio_signal,sample_rate] = audioread(filename);
     window_length=1024;
     step_length=window_length/2;
