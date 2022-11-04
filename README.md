@@ -6,6 +6,8 @@ Files:
 - [`Spectrogram_Plot.m`](#Spectrogram_Plotm): Matlab GUI which implements Spectrogram_Plot.
 - [`audio_file.wav`](#audio_filewav): audio file used for the examples.
 
+[`Features`](#Features): Different features.
+
 ## Spectrogram_Plot.m
 
 Spectrogram_Plot implements a simple audio player as a Matlab programmatic GUI. The user can open a WAV or MP3 file, play/stop the audio, select/drag a region to play, zoom, pan and save on the axes. The code is self-explanatory, heavily commented, and fully modular. Parts of the code can be helpful for other GUIs, especially the `playtool` function which displays a playback line as the playback is in progress and the `selecttool` function which allows the user to create a selection line or region on the audio to play.

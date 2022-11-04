@@ -248,6 +248,7 @@ figure_object.Visible = 'on';
         signal_axes.Visible = 'off';
         cla(spectrogram_axes)
         spectrogram_axes.Visible = 'off';
+        cla(Harmonic_axes)
         drawnow
         
         % Build full file name
@@ -382,14 +383,14 @@ figure_object.Visible = 'on';
         x=size(audio_signal);
         i=1+window_length;
         RMS_audio_signal=zeros(round(size(audio_signal)/step_length));
-        RMS_audio_signal(1)=audio_signal(1);
+        RMS_audio_signal(1)=0;
         j=1;
         while(i<=x(1))
             j=j+1;
             RMS_audio_signal(j)=rms(audio_signal(i-window_length:i));
             i=i+step_length;
         end
-        RMS_audio_signal(end+1)=rms(audio_signal(i-window_length:end));
+        RMS_audio_signal(end+1)=rms(audio_signal(i-step_length:end));
         plot(RMS_axes,1/sample_rate:step_length/sample_rate:number_samples/sample_rate,RMS_audio_signal);
         RMS_axes.XLim = [1,number_samples]/sample_rate;
         RMS_axes.Title.String="RMS, window length=1024";
@@ -449,16 +450,9 @@ figure_object.Visible = 'on';
         barkSpectrum=true);
         features=extract(aFE,audio_signal);
         idx=info(aFE);
-        handle=plotFeatures(aFE,audio_signal);
-        handle.Visible="on";
-        handle.OuterPosition;
-        handle.HandleVisibility="on";
+        plotFeatures(aFE,audio_signal);
         drawnow
         hold on;
-        filter={'*.png';'*.pdf';'*.fig'};
-        [filepath,filename] = uiputfile(filter);
-        path_file = fullfile(filename,filepath);
-        saveas(gcf,path_file);
     end
 
     % Clicked callback function for the select button
