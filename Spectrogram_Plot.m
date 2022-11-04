@@ -68,22 +68,20 @@ function Spectrogram_Plot
 %       https://www.linkedin.com/in/zijie-tang-4ba81b240/
 %       10/03/22
 filename="Counting-16-44p1-mono-15secs.wav";
-    [audio_signal,sample_rate] = audioread(filename);
-    window_length=1024;
-    step_length=window_length/2;
+    [audioIn,fs] = audioread(filename);
     aFE = audioFeatureExtractor( ...
-        SampleRate=sample_rate, ...
-        Window=hamming(window_length,"periodic"), ...
-        OverlapLength=step_length, ...
+        SampleRate=fs, ...
+        Window=hamming(1024,"periodic"), ...
+        OverlapLength=512, ...
         mfcc=true, ...
         pitch=true, ...
         gtcc=true, ...
         erbSpectrum=true, ...
         harmonicRatio=true, ...
         barkSpectrum=true);
-    features=extract(aFE,audio_signal);
+    features=extract(aFE,audioIn);
     idx=info(aFE);
-    handle=plotFeatures(aFE,audio_signal);
+    handle=plotFeatures(aFE,audioIn);
     handle.Visible="on";
     handle.OuterPosition;
     handle.HandleVisibility="on";
@@ -217,9 +215,10 @@ figure_object.Visible = 'on';
 
     % Clicked callback function for the save button
     function saveclickedcallback(~,~)
-        axes2image(signal_axes);
-        axes2image(spectrogram_axes);
-        axes2image(MFCC_axes);
+        filter={'*.png';'*.pdf';'*.fig'};
+        [filepath,filename] = uiputfile(filter);
+        path_file = fullfile(filename,filepath);
+        saveas(gcf,path_file);
     end
     
     % Clicked callback function for the open button
@@ -257,7 +256,7 @@ figure_object.Visible = 'on';
         %audio_file='C:\Users\19713\Dropbox\Spectrogram_WANGLab\experiment.wav';
         % Read audio file and return sample rate in Hz
         [audio_signal,sample_rate] = audioread(audio_file);
-        
+        audio_signal=audio_signal(:,1);
         % Number of samples
         number_samples = size(audio_signal,1);
         
@@ -360,7 +359,7 @@ figure_object.Visible = 'on';
 
         % buffer the signal into 100 ms frames with 50 ms overlap
         axes(Spectral_Centroid_axes);
-        audio_signal_Buffered=buffer(audio_signal,round(sample_rate*0.1),round(sample_rate*0.05),"nodelay");
+        audio_signal_Buffered=buffer(audio_signal,round(sample_rate*0.2),round(sample_rate*0.1),"nodelay");
         [p,cf]=poctave(audio_signal_Buffered,sample_rate);
         centroid=spectralCentroid(p,cf);
         spectralCentroid(p,cf);
@@ -411,22 +410,6 @@ figure_object.Visible = 'on';
         Harmonic_axes.XLabel.String="Time(s)";
         Harmonic_axes.YLabel.String="Harmonic ratio";
 
-        aFE = audioFeatureExtractor( ...
-        SampleRate=sample_rate, ...
-        Window=hamming(window_length,"periodic"), ...
-        OverlapLength=step_length, ...
-        gtcc=true, ...
-        erbSpectrum=true, ...
-        barkSpectrum=true);
-        features=extract(aFE,audio_signal);
-        idx=info(aFE);
-        handle=plotFeatures(aFE,audio_signal);
-        handle.Visible="on";
-        handle.OuterPosition;
-        handle.HandleVisibility="on";
-        drawnow
-        hold on;
-
         % Create object for playing audio
         audio_player = audioplayer(audio_signal,sample_rate);
         
@@ -456,6 +439,26 @@ figure_object.Visible = 'on';
         % Change the pointer symbol back
         figure_object.Pointer = 'arrow';
         drawnow
+
+        aFE = audioFeatureExtractor( ...
+        SampleRate=sample_rate, ...
+        Window=hamming(window_length,"periodic"), ...
+        OverlapLength=step_length, ...
+        gtcc=true, ...
+        erbSpectrum=true, ...
+        barkSpectrum=true);
+        features=extract(aFE,audio_signal);
+        idx=info(aFE);
+        handle=plotFeatures(aFE,audio_signal);
+        handle.Visible="on";
+        handle.OuterPosition;
+        handle.HandleVisibility="on";
+        drawnow
+        hold on;
+        filter={'*.png';'*.pdf';'*.fig'};
+        [filepath,filename] = uiputfile(filter);
+        path_file = fullfile(filename,filepath);
+        saveas(gcf,path_file);
     end
 
     % Clicked callback function for the select button
