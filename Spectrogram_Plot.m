@@ -67,26 +67,7 @@ function Spectrogram_Plot
 %       https://github.com/ZijieTang0316
 %       https://www.linkedin.com/in/zijie-tang-4ba81b240/
 %       10/03/22
-filename="Counting-16-44p1-mono-15secs.wav";
-    [audioIn,fs] = audioread(filename);
-    aFE = audioFeatureExtractor( ...
-        SampleRate=fs, ...
-        Window=hamming(1024,"periodic"), ...
-        OverlapLength=512, ...
-        mfcc=true, ...
-        pitch=true, ...
-        gtcc=true, ...
-        erbSpectrum=true, ...
-        harmonicRatio=true, ...
-        barkSpectrum=true);
-    features=extract(aFE,audioIn);
-    idx=info(aFE);
-    handle=plotFeatures(aFE,audioIn);
-    handle.Visible="on";
-    handle.OuterPosition;
-    handle.HandleVisibility="on";
-    drawnow
-    hold on;
+
 % Get screen size
 screen_size = get(0,'ScreenSize');
 
@@ -189,8 +170,8 @@ Harmonic_axes=axes( ...
     'OuterPosition',[3/4,1/3,1/4,1/3], ...
     'Visible','off');
 
-% Bark
-Bark_axes=axes( ...
+% sfft
+STFT_axes=axes( ...
     'OuterPosition',[3/4,0,1/4,1/3], ...
     'Visible','off');
 
@@ -355,7 +336,7 @@ figure_object.Visible = 'on';
         rate=zerocrossrate(audio_signal,WindowLength=win,Method="comparison");
         plot(Zero_Crossing_Rate_axes,rate);
         Zero_Crossing_Rate_axes.Title.String = 'Zero-Crossing-Rate';
-        Zero_Crossing_Rate_axes.XLabel.String = 'Time (ms)';
+        Zero_Crossing_Rate_axes.XLabel.String = 'Frames';
         Zero_Crossing_Rate_axes.YLabel.String = 'Rate';
 
         % buffer the signal into 100 ms frames with 50 ms overlap
@@ -410,6 +391,12 @@ figure_object.Visible = 'on';
         title("Harmonic ratio");
         Harmonic_axes.XLabel.String="Time(s)";
         Harmonic_axes.YLabel.String="Harmonic ratio";
+
+        % stft 
+        axes(STFT_axes)
+        title('STFT');
+        stft(audio_signal,sample_rate,Window=hamming(1024),OverlapLength=512,FFTLength=1024,FrequencyRange="onesided");
+
 
         % Create object for playing audio
         audio_player = audioplayer(audio_signal,sample_rate);
@@ -969,7 +956,7 @@ end
 function audio_mfcc = mfcc(audio_signal,window_function, step_length, mel_filterbank,number_coefficients)
         
             % Compute the power spectrogram (without the DC component and the mirrored frequencies)
-            audio_stft = stft(audio_signal,window_function,step_length);
+            audio_stft = mfcc_stft(audio_signal,window_function,step_length);
             audio_spectrogram = abs(audio_stft(2:length(window_function)/2+1,:)).^2;
             
             %  Compute the discrete cosine transform of the log magnitude spectrogram 
@@ -979,7 +966,7 @@ function audio_mfcc = mfcc(audio_signal,window_function, step_length, mel_filter
             
 end
 
-function audio_stft = stft(audio_signal,window_function,step_length)
+function audio_stft = mfcc_stft(audio_signal,window_function,step_length)
             % Get the number of samples and the window length in samples
             number_samples = length(audio_signal);
             window_length = length(window_function);
